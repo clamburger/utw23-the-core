@@ -5,9 +5,9 @@ namespace UbertweakNfcReaderWeb
 {
     public class DatabaseContext : DbContext
     {
-        public DbSet<Card> Cards { get; set; }
-        public DbSet<Team> Teams { get; set; }
-        public DbSet<Scan> Scans { get; set; }
+        public DbSet<Card> Cards => Set<Card>();
+        public DbSet<Team> Teams => Set<Team>();
+        public DbSet<Scan> Scans => Set<Scan>();
 
         public readonly string DbPath;
 

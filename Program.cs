@@ -1,5 +1,8 @@
+using MediatR;
+using Microsoft.AspNetCore.Hosting;
 using Spectre.Console;
 using UbertweakNfcReaderWeb.Hubs;
+using UbertweakNfcReaderWeb.Messaging;
 using UbertweakNfcReaderWeb.Services;
 
 namespace UbertweakNfcReaderWeb
@@ -13,7 +16,10 @@ namespace UbertweakNfcReaderWeb
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddSignalR();
-            builder.Services.AddSingleton<IHostedService, NfcService>();
+            builder.Services.AddHostedService<Worker>();
+            builder.Services.AddSingleton<NfcService>();
+            builder.Services.AddSingleton<PlexusService>();
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
 
             var app = builder.Build();
 
@@ -25,9 +31,10 @@ namespace UbertweakNfcReaderWeb
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthorization();
+            app.MapControllers();
 
             app.MapRazorPages();
-            app.MapHub<MessageHub>("/messageHub");
+            app.MapHub<MessageHub>("/api/hub");
 
             ShowWelcomeMessage();
             app.Run();
@@ -36,7 +43,7 @@ namespace UbertweakNfcReaderWeb
         private static void ShowWelcomeMessage()
         {
             Panel panel = new(
-                Align.Center(new Markup("[yellow1]Welcome to the Übertweak Central Plexus\n\nCore systems initialised.[/]"))
+                Align.Center(new Markup("[yellow1]Welcome to the ï¿½bertweak Central Plexus\n\nCore systems initialised.[/]"))
             )
             {
                 Border = BoxBorder.Double,
@@ -45,6 +52,34 @@ namespace UbertweakNfcReaderWeb
             };
             panel.BorderColor(Color.Green1);
             AnsiConsole.Write(panel);
+        }
+    }
+
+    public class Worker : IHostedService
+    {
+        public NfcService _nfcService;
+        public PlexusService _plexusService;
+
+        public Worker(NfcService nfcService, PlexusService plexusService)
+        {
+            _nfcService = nfcService;
+            _plexusService = plexusService;
+        }
+
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
+            _nfcService.Watch();
+            _plexusService.Watch();
+
+            return Task.CompletedTask;
+        }
+
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            _nfcService.StopWatch();
+            _plexusService.StopWatch();
+
+            return Task.CompletedTask;
         }
     }
 }

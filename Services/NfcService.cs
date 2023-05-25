@@ -4,6 +4,7 @@ using PCSC;
 using PCSC.Exceptions;
 using PCSC.Iso7816;
 using PCSC.Monitoring;
+using PCSC.Reactive.Events;
 using PCSC.Utils;
 using Spectre.Console;
 using System.Formats.Asn1;
@@ -11,12 +12,15 @@ using System.Reactive.Linq;
 
 namespace UbertweakNfcReaderWeb.Services
 {
-    internal class NfcService : IHostedService
+    public class NfcService
     {
         private readonly ILogger _logger;
-        private IDeviceMonitor? _deviceMonitor;
-        private ISCardMonitor? _cardMonitor;
+        private IDeviceMonitor? _deviceMonitor { get; set; }
+        private ISCardMonitor? _cardMonitor { get; set; }
         private readonly IContextFactory _contextFactory;
+
+        public event EventHandler<CardInsertedEventArgs>? CardInserted;
+        public event EventHandler<CardStatusEventArgs>? CardRemoved;
 
         public NfcService(ILogger<NfcService> logger)
         {
@@ -24,7 +28,7 @@ namespace UbertweakNfcReaderWeb.Services
             _contextFactory = ContextFactory.Instance;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public void Watch()
         {
             using (var ctx = _contextFactory.Establish(SCardScope.System))
             {
@@ -36,8 +40,6 @@ namespace UbertweakNfcReaderWeb.Services
                 _deviceMonitor.MonitorException += DeviceMonitorException;
                 _deviceMonitor.Start();
             }
-
-            return Task.CompletedTask;
         }
 
         private void DeviceStatusChanged(object sender, DeviceChangeEventArgs e)
@@ -82,17 +84,24 @@ namespace UbertweakNfcReaderWeb.Services
             _cardMonitor = new SCardMonitor(_contextFactory, SCardScope.System);
 
             // Point the callback function(s) to the anonymous & static defined methods below.
-            _cardMonitor.CardInserted += CardInserted;
-            _cardMonitor.CardRemoved += CardRemoved;
-            _cardMonitor.MonitorException += MonitorException;
+            _cardMonitor.CardInserted += CardInsertedInternal;
+            _cardMonitor.CardRemoved += CardRemovedInternal;
+            _cardMonitor.MonitorException += CardMonitorException;
             _cardMonitor.Start(readers);
 
             AnsiConsole.MarkupLine("[white]NFC reader detected. Ready to read cards.[/]");
         }
 
-        private void CardInserted(object sender, CardStatusEventArgs e)
+        private void CardInsertedInternal(object sender, CardStatusEventArgs e)
         {
             var uid = GetCardUid(e.ReaderName);
+
+            CardInserted?.Invoke(this, new CardInsertedEventArgs
+            {
+                CardStatusEventArgs = e,
+                Uid = uid
+            });
+
             AnsiConsole.MarkupLineInterpolated($"[lime]Card detected: {(uid == null ? "unknown" : uid)}[/]");
         }
 
@@ -114,25 +123,31 @@ namespace UbertweakNfcReaderWeb.Services
             return response.HasData ? BitConverter.ToString(response.GetData()) : null;
         }
 
-        private static void CardRemoved(object sender, CardStatusEventArgs e)
+        private void CardRemovedInternal(object sender, CardStatusEventArgs e)
         {
+            CardRemoved?.Invoke(this, e);
+
             AnsiConsole.MarkupLine("[grey]Card removed.[/]");
         }
 
-        private static void MonitorException(object sender, PCSCException ex)
+        private static void CardMonitorException(object sender, PCSCException ex)
         {
             AnsiConsole.MarkupLineInterpolated($"Card monitor exited due an error: {SCardHelper.StringifyError(ex.SCardError)}");
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public void StopWatch()
         {
             _deviceMonitor?.Cancel();
             _deviceMonitor?.Dispose();
 
             _cardMonitor?.Cancel();
             _cardMonitor?.Dispose();
-
-            return Task.CompletedTask;
         }
+    }
+
+    public class CardInsertedEventArgs
+    {
+        public required CardStatusEventArgs CardStatusEventArgs { get; set; }
+        public string? Uid { get; set; }
     }
 }

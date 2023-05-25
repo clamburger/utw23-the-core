@@ -15,6 +15,8 @@ connection.on("ReceiveMessage", function (user, message) {
 });
 
 connection.start().then(function () {
+    connection.invoke("RegisterPrimary");
+
     document.getElementById("sendButton").disabled = false;
 }).catch(function (err) {
     return console.error(err.toString());
