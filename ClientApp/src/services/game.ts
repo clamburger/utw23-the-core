@@ -8,3 +8,11 @@ export enum DisplayState {
   RegisteringCards,
   ResettingCards
 }
+
+export enum CardType {
+  Admin,
+  Team,
+  Credits,
+  Reward,
+  Special
+}

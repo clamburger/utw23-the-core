@@ -22,7 +22,7 @@ namespace UbertweakNfcReaderWeb.Migrations
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
                     Redeemed = table.Column<bool>(type: "INTEGER", nullable: true),
                     Pin = table.Column<string>(type: "TEXT", nullable: true),
-                    Credits = table.Column<int>(type: "INTEGER", nullable: false)
+                    Credits = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {

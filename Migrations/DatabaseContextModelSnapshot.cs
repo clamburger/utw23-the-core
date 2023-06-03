@@ -23,7 +23,7 @@ namespace UbertweakNfcReaderWeb.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Credits")
+                    b.Property<int?>("Credits")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Number")

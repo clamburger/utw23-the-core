@@ -25,6 +25,14 @@
         <span class='bg-gradient-to-br from-orange-500 to-yellow-300 bg-clip-text text-transparent box-decoration-clone capitalize'>
             Resetting cards
         </span>
+    {:else if state === DisplayState.RegisteringCards}
+        <span class='bg-gradient-to-br from-yellow-500 to-orange-300 bg-clip-text text-transparent box-decoration-clone capitalize'>
+            Registering cards
+        </span>
+    {:else if state === DisplayState.AdminDashboard}
+        <span class='bg-gradient-to-br from-blue-500 to-blue-300 bg-clip-text text-transparent box-decoration-clone capitalize'>
+            Admin dashboard
+        </span>
     {:else}
         <span class='bg-gradient-to-br from-stone-500 to-slate-300 bg-clip-text text-transparent box-decoration-clone capitalize'>
             Unknown state    

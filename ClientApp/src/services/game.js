@@ -9,4 +9,12 @@ export var DisplayState;
     DisplayState[DisplayState["RegisteringCards"] = 6] = "RegisteringCards";
     DisplayState[DisplayState["ResettingCards"] = 7] = "ResettingCards";
 })(DisplayState || (DisplayState = {}));
+export var CardType;
+(function (CardType) {
+    CardType[CardType["Admin"] = 0] = "Admin";
+    CardType[CardType["Team"] = 1] = "Team";
+    CardType[CardType["Credits"] = 2] = "Credits";
+    CardType[CardType["Reward"] = 3] = "Reward";
+    CardType[CardType["Special"] = 4] = "Special";
+})(CardType || (CardType = {}));
 //# sourceMappingURL=game.js.map

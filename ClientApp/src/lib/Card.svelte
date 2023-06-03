@@ -15,6 +15,12 @@
         box-shadow: 0 0 50px theme('colors.success.700');
     }
 
+    .invalid {
+        @apply bg-error-500 text-on-error-token font-bold shadow-inner;
+
+        box-shadow: 0 0 50px theme('colors.error.700');
+    }
+
     .dash {
         @apply font-thin;
     }
@@ -29,6 +35,8 @@
 
 <script lang="ts">
     export let card;
+    export let uid: string;
+    export let invalid: boolean = false;
 
     function formatUid(uid: string): string
     {
@@ -48,10 +56,11 @@
 
         return elements.join('<span class="dash">-</span>');
     }
-
-    $: console.log(formatUid(card));
 </script>
 
-<div class='nfc-card card flex justify-center items-center mx-auto font-mono transition' class:active="{card}">
-    {@html card ? formatUid(card) : 'Touch card to reader'}
+<div class='nfc-card card flex flex-col justify-center items-center mx-auto font-mono transition' class:active="{uid && !invalid}" class:invalid="{uid && invalid}">
+    {#if invalid}
+        <div>Unregistered card</div>
+    {/if}
+    <div>{@html uid ? formatUid(uid) : 'Touch card to reader'}</div>
 </div>
