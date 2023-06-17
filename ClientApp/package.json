@@ -28,6 +28,7 @@
     "vite": "^4.3.2"
   },
   "dependencies": {
-    "@microsoft/signalr": "^7.0.5"
+    "@microsoft/signalr": "^7.0.5",
+    "dayjs": "^1.11.8"
   }
 }

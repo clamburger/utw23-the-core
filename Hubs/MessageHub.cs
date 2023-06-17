@@ -118,7 +118,7 @@ namespace UbertweakNfcReaderWeb.Hubs
                     Uid = uid,
                     Type = type,
                     Number = hexString,
-                    Credits = (int)arg1,
+                    Data = (string)arg1,
                 };
             } else if (type == CardType.Team) {
                 var name = (string)arg1;

@@ -11,7 +11,7 @@ using UbertweakNfcReaderWeb;
 namespace UbertweakNfcReaderWeb.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230525081403_InitialCreate")]
+    [Migration("20230617062115_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -26,11 +26,13 @@ namespace UbertweakNfcReaderWeb.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("Credits")
+                    b.Property<string>("Data")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("Enabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Number")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Pin")

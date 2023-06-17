@@ -4,6 +4,8 @@
   import Card from './Card.svelte';
   import StateHeader from './StateHeader.svelte';
   import { ProgressRadial } from '@skeletonlabs/skeleton';
+  import SystemLog from "./SystemLog.svelte";
+  import {addLog} from "../stores";
 
     export const connection = setupSignalRConnection('/api/hub', {});
 
@@ -12,11 +14,11 @@
     let systemSuccess: string;
 
     connection.on('ScreenRegistered', (firstTimeSetup: boolean) => {
-        messages = [...messages, "Registered as the primary screen"]
+        addLog("Registered as the primary screen");
 
         if (firstTimeSetup) {
             state = DisplayState.FirstTimeSetup;
-            messages = [...messages, "No admin cards registered - entering first time setup"];
+            addLog("No admin cards registered - entering first time setup");
         } else {
             state = DisplayState.Ready;
         }
@@ -24,17 +26,16 @@
 
     connection.on('ScreenDeregistered', () => {
         state = DisplayState.Disconnected;
-        messages = [...messages, "Disconnected: another screen has become the primary"]
+        addLog("Disconnected: another screen has become the primary");
     });
 
     connection.on('SystemMessage', (message: string) => {
-      messages.push(message);
-      messages = messages;
+        addLog(message);
     });
 
     connection.on('CardInserted', (_card, uid) => {
         //card = uid;
-        messages = [...messages, `Card inserted: ${uid}`];
+        addLog(`Card inserted: ${uid}`);
         systemError = undefined;
         systemSuccess = undefined;
 
@@ -73,7 +74,7 @@
         }
 
         var intervalFunc = intervalBuilder(_card, uid, callback);
-        interval = setInterval(intervalFunc, 1000 / 10);
+        interval = setInterval(intervalFunc, 10);
         intervalFunc();
     });
 
@@ -94,15 +95,21 @@
     function intervalBuilder(_card: any, _uid: string, callback: (_card: any) => void)
     {
         return () => {
-            progress = progress + (100 / 10);
+            progress = 100;
+            clearInterval(interval);
+            addLog(JSON.stringify(_card));
+            callback(_card);
+        }
+        
+        return () => {
+            progress = progress + 5;
         
             if (progress >= 100) {
                 progress = 100;
                 card = _card;
                 uid = _uid;
                 clearInterval(interval);
-                messages.push(JSON.stringify(_card));
-                messages = messages;
+                addLog(JSON.stringify(_card));
                 callback(_card);
             }
         }
@@ -111,7 +118,7 @@
     connection.on('CardRemoved', () => {
         card = null;
         uid = null;
-        messages = [...messages, 'Card removed'];
+        addLog('Card removed');
         systemError = undefined;
         systemSuccess = undefined;
 
@@ -128,8 +135,7 @@
     {
         state = _state;
     }
-
-    let messages = [''];
+  
     let card = null;
     let uid: string|null = null;
     let progress = 0;
@@ -150,6 +156,10 @@
     :global(.glow) {
         @apply bg-success-700/25;
         box-shadow: 0 0 50px theme('colors.success.700');
+    }
+    
+    :global(.progress-radial .progress-radial-meter) {
+        transition-duration: 20ms;
     }
 </style>
 
@@ -210,14 +220,5 @@
         </aside>
     {/if}
 
-    <div class='text-left shadow bg-neutral-900/90 rounded-container-token p-4'>
-        <div class='text-sm border-b border-b-neutral-500 mb-2 pb-1' style='font-variant-caps: small-caps;'>
-            System Log
-        </div>
-        <div class='font-mono'>
-            {#each messages as message}
-                <div>{message}</div>
-            {/each}
-        </div>
-    </div>
+    <SystemLog />
 </div>

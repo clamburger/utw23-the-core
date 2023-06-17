@@ -1,22 +1,23 @@
-﻿namespace UbertweakNfcReaderWeb.Models
-{
-    public class Card
-    {
-        public int Id { get; set; }
-        public required string Uid { get; set; }
-        public required string Number { get; set; }
-        public required CardType Type { get; set; }
-        public bool? Redeemed { get; set; }
-        public string? Pin { get; set; }
-        public int? Credits { get; set; }
-    }
+﻿namespace UbertweakNfcReaderWeb.Models;
 
-    public enum CardType
-    {
-        Admin,
-        Team,
-        Credits,
-        Reward,
-        Special
-    }
+public class Card
+{
+    public int Id { get; set; }
+    public required string Uid { get; set; }
+    public string? Number { get; set; }
+    public required CardType Type { get; set; }
+    public bool? Redeemed { get; set; }
+    public string? Pin { get; set; }
+    public string? Data { get; set; }
+    public bool? Enabled { get; set; } = true;
+}
+
+public enum CardType
+{
+    Admin,
+    Person,
+    Team,
+    Credits,
+    Reward,
+    Special
 }

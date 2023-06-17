@@ -12,8 +12,23 @@ using System.Reactive.Linq;
 
 namespace UbertweakNfcReaderWeb.Services
 {
+    [Flags]
+    public enum ReaderBehaviour
+    {
+        None = 0,
+        LedBlinkedOnAccess = 1,
+        InterfacePolling = 2,
+        InterfaceActivated = 4,
+        BeepOnInsertion = 8,
+        BeepOnRemoval = 16,
+        BeepOnPowerOn = 32,
+        ColorSelectGreen = 64,
+        ColorSelectRed = 128
+    }
+    
     public class NfcService
     {
+        private const IntPtr PeripheralControlCode = 0x310000 + 3500 * 4;
         private readonly ILogger _logger;
         private IDeviceMonitor? _deviceMonitor { get; set; }
         private ISCardMonitor? _cardMonitor { get; set; }
@@ -51,7 +66,7 @@ namespace UbertweakNfcReaderWeb.Services
 
             foreach (var reader in e.AttachedReaders)
             {
-                AnsiConsole.MarkupLine($"[grey]An NFC reader has been connected: {reader}[/]");
+                AnsiConsole.MarkupLine($"[yellow]An NFC reader has been connected: {reader}[/]");
             }
 
             ReinitializeCardMonitor(e.AllReaders.ToArray());
@@ -67,8 +82,29 @@ namespace UbertweakNfcReaderWeb.Services
             AnsiConsole.MarkupLineInterpolated($"Device monitor encountered an error: {e.Exception.Message}");
         }
 
+        private void VerifyReaderSettings(string readerName)
+        {
+            AnsiConsole.MarkupLineInterpolated($"[yellow]Firmware version: {GetFirmwareVersion(readerName)}[/]");
+            var behaviour = GetReaderBehaviour(readerName);
+            AnsiConsole.MarkupLineInterpolated($"[yellow]Behaviour status: {behaviour}[/]");
+
+            AnsiConsole.MarkupLineInterpolated($"[yellow]Setting desired reader behaviour...[/]");
+            behaviour |= ReaderBehaviour.BeepOnPowerOn;
+            behaviour |= ReaderBehaviour.BeepOnInsertion;
+            behaviour &= ~ReaderBehaviour.BeepOnRemoval;
+            UpdateReaderBehaviour(readerName, behaviour);
+            
+            var newBehaviour = GetReaderBehaviour(readerName);
+            AnsiConsole.MarkupLineInterpolated($"[yellow]New behaviour status: {newBehaviour}[/]");
+        }
+
         private void ReinitializeCardMonitor(string[] readers)
         {
+            foreach (var reader in readers.Where(name => name.Contains("PICC")))
+            {
+                VerifyReaderSettings(reader);
+            }
+            
             if (_cardMonitor != null)
             {
                 _cardMonitor.Cancel();
@@ -103,6 +139,53 @@ namespace UbertweakNfcReaderWeb.Services
             });
 
             AnsiConsole.MarkupLineInterpolated($"[lime]Card detected: {(uid == null ? "unknown" : uid)}[/]");
+        }
+
+        public string GetFirmwareVersion(string readerName)
+        {
+            using var ctx = _contextFactory.Establish(SCardScope.System);
+            using var reader = new SCardReader(ctx);
+            reader.Connect(readerName, SCardShareMode.Direct, SCardProtocol.Unset);
+
+            // 5.4.1. Get Firmware Version
+            var sendBytes = new byte[] { 0xE0, 0x00, 0x00, 0x18, 0x00 };
+            var receiveBytes = new byte[255];
+
+            reader.Control(PeripheralControlCode, sendBytes, ref receiveBytes);
+            
+            var responseContent = receiveBytes.Skip(5).Take(receiveBytes[4]).ToArray();
+            
+            return System.Text.Encoding.Default.GetString(responseContent);
+        }
+
+        public ReaderBehaviour GetReaderBehaviour(string readerName)
+        {
+            using var ctx = _contextFactory.Establish(SCardScope.System);
+            using var reader = new SCardReader(ctx);
+            reader.Connect(readerName, SCardShareMode.Direct, SCardProtocol.Unset);
+
+            // 5.4.6. Read LED and Buzzer Status Indicator Behavior for PICC Interface
+            var sendBytes = new byte[] { 0xE0, 0x00, 0x00, 0x21, 0x00 };
+            var receiveBytes = new byte[6];
+
+            reader.Control(PeripheralControlCode, sendBytes, ref receiveBytes);
+
+            var behaviour = receiveBytes.Skip(5).First();
+            
+            return (ReaderBehaviour) behaviour;
+        }
+
+        public void UpdateReaderBehaviour(string readerName, ReaderBehaviour behaviour)
+        {
+            using var ctx = _contextFactory.Establish(SCardScope.System);
+            using var reader = new SCardReader(ctx);
+            reader.Connect(readerName, SCardShareMode.Direct, SCardProtocol.Unset);
+            
+            // 5.4.5. Set LED and Buzzer Status Indicator Behavior for PICC Interface
+            var sendBytes = new byte[] { 0xE0, 0x00, 0x00, 0x21, 0x01, (byte)behaviour };
+            var receiveBytes = new byte[6];
+            
+            reader.Control(PeripheralControlCode, sendBytes, ref receiveBytes);
         }
 
         public string? GetCardUid(string readerName)

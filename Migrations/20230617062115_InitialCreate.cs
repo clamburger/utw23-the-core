@@ -18,11 +18,12 @@ namespace UbertweakNfcReaderWeb.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Uid = table.Column<string>(type: "TEXT", nullable: false),
-                    Number = table.Column<string>(type: "TEXT", nullable: false),
+                    Number = table.Column<string>(type: "TEXT", nullable: true),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
                     Redeemed = table.Column<bool>(type: "INTEGER", nullable: true),
                     Pin = table.Column<string>(type: "TEXT", nullable: true),
-                    Credits = table.Column<int>(type: "INTEGER", nullable: true)
+                    Data = table.Column<string>(type: "TEXT", nullable: true),
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
