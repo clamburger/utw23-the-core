@@ -42,4 +42,10 @@
     <None Remove="ClientApp%2a%2a" />
   </ItemGroup>
 
+
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

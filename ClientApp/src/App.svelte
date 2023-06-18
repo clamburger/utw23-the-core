@@ -1,12 +1,26 @@
 <script lang="ts">
-  import Messenger from './lib/Messenger.svelte';
+  import MainDisplay from './lib/MainDisplay.svelte';
   import { AppShell } from '@skeletonlabs/skeleton';
+  import SystemLog from "./lib/SystemLog.svelte";
+  import CardReader from "./lib/CardReader.svelte";
 </script>
 
+<style lang="scss">
+    :global(.SystemLog .log) {
+        height: 120px;
+    }
+</style>
+
 <AppShell>
-  <div class="container h-full mx-auto flex justify-center items-center">
-    <div class="text-center flex flex-col items-center">
-        <Messenger />  
+    <div class="p-4">
+        <CardReader />
     </div>
-  </div>
+    
+    <div class="container mx-auto flex justify-center flex-grow px-8 pb-2 pt-0">
+        <MainDisplay />
+    </div>
+
+    <svelte:fragment slot="footer">
+        <SystemLog />
+    </svelte:fragment>
 </AppShell>

@@ -1,9 +1,13 @@
 ﻿namespace UbertweakNfcReaderWeb.Models;
 
-public class Card
+public class AnyCard
+{
+    public required string Uid { get; set; }
+}
+
+public class Card : AnyCard
 {
     public int Id { get; set; }
-    public required string Uid { get; set; }
     public string? Number { get; set; }
     public required CardType Type { get; set; }
     public bool? Redeemed { get; set; }

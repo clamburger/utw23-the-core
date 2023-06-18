@@ -30,15 +30,15 @@ namespace UbertweakNfcReaderWeb.Services
             _nfc.CardRemoved -= CardRemoved;
         }
 
-        public void CardInserted(object? sender, CardInsertedEventArgs e)
+        private void CardInserted(object? sender, CardInsertedEventArgs e)
         {
             using var db = new DatabaseContext();
-            var card = db.Cards.FirstOrDefault(c => c.Uid == e.Uid);
+            var card = db.Cards.FirstOrDefault(c => c.Uid == e.Uid) ?? new AnyCard { Uid = e.Uid };
 
-            _mediator.Publish(new CardInserted { Card = card, Uid = e.Uid });
+            _mediator.Publish(new CardInserted { Card = card });
         }
 
-        public void CardRemoved(object? sender, CardStatusEventArgs e)
+        private void CardRemoved(object? sender, CardStatusEventArgs e)
         {
             _mediator.Publish(new CardRemoved());
         }

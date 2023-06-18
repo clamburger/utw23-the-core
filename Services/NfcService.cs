@@ -9,6 +9,7 @@ using PCSC.Utils;
 using Spectre.Console;
 using System.Formats.Asn1;
 using System.Reactive.Linq;
+using UbertweakNfcReaderWeb.Exceptions;
 
 namespace UbertweakNfcReaderWeb.Services
 {
@@ -29,9 +30,9 @@ namespace UbertweakNfcReaderWeb.Services
     public class NfcService
     {
         private const IntPtr PeripheralControlCode = 0x310000 + 3500 * 4;
-        private readonly ILogger _logger;
-        private IDeviceMonitor? _deviceMonitor { get; set; }
-        private ISCardMonitor? _cardMonitor { get; set; }
+        private readonly ILogger<NfcService> _logger;
+        private IDeviceMonitor? DeviceMonitor { get; set; }
+        private ISCardMonitor? CardMonitor { get; set; }
         private readonly IContextFactory _contextFactory;
 
         public event EventHandler<CardInsertedEventArgs>? CardInserted;
@@ -45,16 +46,14 @@ namespace UbertweakNfcReaderWeb.Services
 
         public void Watch()
         {
-            using (var ctx = _contextFactory.Establish(SCardScope.System))
-            {
-                var factory = DeviceMonitorFactory.Instance;
+            using var ctx = _contextFactory.Establish(SCardScope.System);
+            var factory = DeviceMonitorFactory.Instance;
 
-                _deviceMonitor = factory.Create(SCardScope.System);
-                _deviceMonitor.StatusChanged += DeviceStatusChanged;
-                _deviceMonitor.Initialized += DeviceMonitorInitialized;
-                _deviceMonitor.MonitorException += DeviceMonitorException;
-                _deviceMonitor.Start();
-            }
+            DeviceMonitor = factory.Create(SCardScope.System);
+            DeviceMonitor.StatusChanged += DeviceStatusChanged;
+            DeviceMonitor.Initialized += DeviceMonitorInitialized;
+            DeviceMonitor.MonitorException += DeviceMonitorException;
+            DeviceMonitor.Start();
         }
 
         private void DeviceStatusChanged(object sender, DeviceChangeEventArgs e)
@@ -105,10 +104,10 @@ namespace UbertweakNfcReaderWeb.Services
                 VerifyReaderSettings(reader);
             }
             
-            if (_cardMonitor != null)
+            if (CardMonitor != null)
             {
-                _cardMonitor.Cancel();
-                _cardMonitor.Dispose();
+                CardMonitor.Cancel();
+                CardMonitor.Dispose();
             }
 
             if (!readers.Any())
@@ -117,20 +116,30 @@ namespace UbertweakNfcReaderWeb.Services
                 return;
             }
 
-            _cardMonitor = new SCardMonitor(_contextFactory, SCardScope.System);
+            CardMonitor = new SCardMonitor(_contextFactory, SCardScope.System);
 
             // Point the callback function(s) to the anonymous & static defined methods below.
-            _cardMonitor.CardInserted += CardInsertedInternal;
-            _cardMonitor.CardRemoved += CardRemovedInternal;
-            _cardMonitor.MonitorException += CardMonitorException;
-            _cardMonitor.Start(readers);
+            CardMonitor.CardInserted += CardInsertedInternal;
+            CardMonitor.CardRemoved += CardRemovedInternal;
+            CardMonitor.MonitorException += CardMonitorException;
+            CardMonitor.Start(readers);
 
             AnsiConsole.MarkupLine("[white]NFC reader detected. Ready to read cards.[/]");
         }
 
         private void CardInsertedInternal(object sender, CardStatusEventArgs e)
         {
-            var uid = GetCardUid(e.ReaderName);
+            string uid;
+            
+            try
+            {
+                uid = GetCardUid(e.ReaderName);
+            }
+            catch (UnreadableUidException)
+            {
+                AnsiConsole.MarkupLineInterpolated($"[lime]Card detected:[/] [red]unknown UID[/]");
+                return;
+            }
 
             CardInserted?.Invoke(this, new CardInsertedEventArgs
             {
@@ -138,7 +147,7 @@ namespace UbertweakNfcReaderWeb.Services
                 Uid = uid
             });
 
-            AnsiConsole.MarkupLineInterpolated($"[lime]Card detected: {(uid == null ? "unknown" : uid)}[/]");
+            AnsiConsole.MarkupLineInterpolated($"[lime]Card detected: {uid}[/]");
         }
 
         public string GetFirmwareVersion(string readerName)
@@ -188,7 +197,7 @@ namespace UbertweakNfcReaderWeb.Services
             reader.Control(PeripheralControlCode, sendBytes, ref receiveBytes);
         }
 
-        public string? GetCardUid(string readerName)
+        public string GetCardUid(string readerName)
         {
             using var ctx = _contextFactory.Establish(SCardScope.System);
             using var isoReader = new IsoReader(ctx, readerName, SCardShareMode.Shared, SCardProtocol.Any, false);
@@ -203,7 +212,12 @@ namespace UbertweakNfcReaderWeb.Services
             };
 
             var response = isoReader.Transmit(apdu);
-            return response.HasData ? BitConverter.ToString(response.GetData()) : null;
+            if (!response.HasData)
+            {
+                throw new Exception("Unable to read card UID");
+            }
+
+            return BitConverter.ToString(response.GetData());
         }
 
         private void CardRemovedInternal(object sender, CardStatusEventArgs e)
@@ -220,17 +234,17 @@ namespace UbertweakNfcReaderWeb.Services
 
         public void StopWatch()
         {
-            _deviceMonitor?.Cancel();
-            _deviceMonitor?.Dispose();
+            DeviceMonitor?.Cancel();
+            DeviceMonitor?.Dispose();
 
-            _cardMonitor?.Cancel();
-            _cardMonitor?.Dispose();
+            CardMonitor?.Cancel();
+            CardMonitor?.Dispose();
         }
     }
 
     public class CardInsertedEventArgs
     {
         public required CardStatusEventArgs CardStatusEventArgs { get; set; }
-        public string? Uid { get; set; }
+        public required string Uid { get; set; }
     }
 }

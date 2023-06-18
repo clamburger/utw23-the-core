@@ -11,7 +11,7 @@ using UbertweakNfcReaderWeb;
 namespace UbertweakNfcReaderWeb.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230617062115_InitialCreate")]
+    [Migration("20230618125111_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -87,10 +87,8 @@ namespace UbertweakNfcReaderWeb.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("Admin")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Colour")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -103,6 +101,29 @@ namespace UbertweakNfcReaderWeb.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Teams");
+                });
+
+            modelBuilder.Entity("UbertweakNfcReaderWeb.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Leader")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("TeamId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("UbertweakNfcReaderWeb.Models.Scan", b =>
@@ -120,6 +141,15 @@ namespace UbertweakNfcReaderWeb.Migrations
                         .IsRequired();
 
                     b.Navigation("Card");
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("UbertweakNfcReaderWeb.Models.User", b =>
+                {
+                    b.HasOne("UbertweakNfcReaderWeb.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId");
 
                     b.Navigation("Team");
                 });

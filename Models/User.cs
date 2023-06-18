@@ -1,10 +1,12 @@
 ﻿namespace UbertweakNfcReaderWeb.Models;
 
-public class Person
+public class User
 {
     public int Id { get; set; }
     
     public required string Name { get; set; }
     
-    public bool? Leader { get; set; }
+    public required bool Leader { get; set; }
+    
+    public Team? Team { get; set; }
 }

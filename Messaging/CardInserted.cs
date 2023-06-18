@@ -8,9 +8,7 @@ namespace UbertweakNfcReaderWeb.Messaging
 {
     public class CardInserted : INotification
     {
-        public Card? Card { get; set; }
-
-        public string? Uid { get; set; }
+        public required AnyCard Card { get; init; }
     }
 
     public class CardInsertedHandler : INotificationHandler<CardInserted>
@@ -28,7 +26,7 @@ namespace UbertweakNfcReaderWeb.Messaging
         {
             if (_plexus.PrimaryConnection != null)
             {
-                await _hubContext.Clients.Client(_plexus.PrimaryConnection).CardInserted(request.Card, request.Uid);
+                await _hubContext.Clients.Client(_plexus.PrimaryConnection).CardInserted(request.Card);
             }
         }
     }

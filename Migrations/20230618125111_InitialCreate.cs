@@ -17,13 +17,13 @@ namespace UbertweakNfcReaderWeb.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Uid = table.Column<string>(type: "TEXT", nullable: false),
                     Number = table.Column<string>(type: "TEXT", nullable: true),
                     Type = table.Column<int>(type: "INTEGER", nullable: false),
                     Redeemed = table.Column<bool>(type: "INTEGER", nullable: true),
                     Pin = table.Column<string>(type: "TEXT", nullable: true),
                     Data = table.Column<string>(type: "TEXT", nullable: true),
-                    Enabled = table.Column<bool>(type: "INTEGER", nullable: true)
+                    Enabled = table.Column<bool>(type: "INTEGER", nullable: true),
+                    Uid = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,9 +37,8 @@ namespace UbertweakNfcReaderWeb.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Colour = table.Column<string>(type: "TEXT", nullable: true),
-                    Pin = table.Column<string>(type: "TEXT", nullable: true),
-                    Admin = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Colour = table.Column<string>(type: "TEXT", nullable: false),
+                    Pin = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -74,6 +73,26 @@ namespace UbertweakNfcReaderWeb.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Leader = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TeamId = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Teams_TeamId",
+                        column: x => x.TeamId,
+                        principalTable: "Teams",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Scans_CardId",
                 table: "Scans",
@@ -83,6 +102,11 @@ namespace UbertweakNfcReaderWeb.Migrations
                 name: "IX_Scans_TeamId",
                 table: "Scans",
                 column: "TeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_TeamId",
+                table: "Users",
+                column: "TeamId");
         }
 
         /// <inheritdoc />
@@ -90,6 +114,9 @@ namespace UbertweakNfcReaderWeb.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Scans");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Cards");

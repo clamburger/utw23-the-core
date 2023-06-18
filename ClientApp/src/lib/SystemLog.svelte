@@ -4,24 +4,25 @@
     import dayjs from "dayjs";
     let element;
 
+    const scrollToTop = async (node: HTMLElement) => {
+        node.scroll({ top: 0 });
+    };
     const scrollToBottom = async (node: HTMLElement) => {
         node.scroll({ top: node.scrollHeight, behavior: "smooth" });
     };
     
     afterUpdate(() => {
-        scrollToBottom(element);
+        scrollToTop(element);
     });
 </script>
 
 <style lang="scss">
     .log {
-        height: 210px;
-        width: 1000px;
         overflow-y: scroll;
     }
 </style>
 
-<div class='text-left shadow bg-neutral-900/90 rounded-container-token p-4'>
+<div class='text-left shadow bg-neutral-900/90 p-4 SystemLog'>
     <div class='text-sm border-b border-b-neutral-500 mb-2 pb-1' style='font-variant-caps: small-caps;'>
         System Log
     </div>

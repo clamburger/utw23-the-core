@@ -6,6 +6,7 @@ namespace UbertweakNfcReaderWeb
     public class DatabaseContext : DbContext
     {
         public DbSet<Card> Cards => Set<Card>();
+        public DbSet<User> Users => Set<User>();
         public DbSet<Team> Teams => Set<Team>();
         public DbSet<Scan> Scans => Set<Scan>();
 
