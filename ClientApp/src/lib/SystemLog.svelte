@@ -22,11 +22,11 @@
     }
 </style>
 
-<div class='text-left shadow bg-neutral-900/90 p-4 SystemLog'>
-    <div class='text-sm border-b border-b-neutral-500 mb-2 pb-1' style='font-variant-caps: small-caps;'>
+<div class='text-left shadow bg-neutral-900/90 p-2 pb-0 SystemLog'>
+    <div class='text-sm border-b border-b-neutral-500 pb-1' style='font-variant-caps: small-caps;'>
         System Log
     </div>
-    <div class='font-mono log pr-4' bind:this={element}>
+    <div class='font-mono text-xs log pr-4 pt-1' bind:this={element}>
         {#each $systemLog as {date, message}}
             <div>
                 <span class="date text-surface-500">{dayjs(date).format('HH:mm:ss')}</span>

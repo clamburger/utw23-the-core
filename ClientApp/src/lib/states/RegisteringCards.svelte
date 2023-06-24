@@ -1,13 +1,40 @@
 ﻿<script lang="ts">
     import {type Card, CardType, DisplayState, type RegisteredCard} from "../../services/game";
-    import {card, connection, changeState, clearAlert, showAlert, cardInserted, addLog} from "../../stores";
+    import {addLog, card, cardInserted, changeState, clearAlert, connection, showAlert} from "../../stores";
     import {onMount} from "svelte";
     import {RadioGroup, RadioItem, SlideToggle} from '@skeletonlabs/skeleton';
+    import wretch from 'wretch';
+    import firstBy from "thenby";
 
     let autoSubmit = true;
     let type = CardType.Admin;
     let label = '0x00';
     let credits = 100;
+    
+    let users = [];
+    let selectedUser: number;
+    
+    onMount(() => {
+        fetchUsers();
+    });
+    
+    function fetchUsers() {
+        wretch('/api/Admin/users')
+            .get()
+            .json(result => {
+                users = result.sort(
+                    firstBy((a) => a.team?.name)
+                        .thenBy('leader', -1)
+                        .thenBy('name')
+                );
+                if (selectedUser === undefined) {
+                    selectedUser = users[0].id;
+                } else {
+                    var index = users.findIndex(u => u.id === selectedUser);
+                    selectedUser = users[index + 1]?.id;
+                }
+            });
+    }
 
     function performRegistration() {
         clearAlert();
@@ -16,6 +43,12 @@
             $connection.invoke('RegisterAdminCard', $card.uid, label);
         } else if (type === CardType.Credits) {
             $connection.invoke('RegisterCreditsCard', $card.uid, credits, label);
+        } else if (type === CardType.Person) {
+            if (selectedUser === undefined) {
+                showAlert("error", "No person selected.");
+            } else {
+                $connection.invoke('RegisterPersonCard', $card.uid, selectedUser);
+            }
         } else {
             showAlert("error", "Unsupported card type selected.");
         }
@@ -33,6 +66,11 @@
         cardInserted(_card);
         
         addLog(`${CardType[_card.type]} card registered [${_card.number || 'no label'}]`);
+        
+        if (_card.type === CardType.Person) {
+            fetchUsers();
+            return;
+        }
 
         const matches = label.match(/^0x([0-9A-F]+)$/);
         if (!matches) {
@@ -44,6 +82,10 @@
 
         // Increment number, convert to base 16, and pad to same number of digits
         label = "0x" + (number + 1).toString(16).toUpperCase().padStart(matches[1].length, '0');
+    }
+    
+    function selectUser(_user) {
+        selectedUser = _user.id;
     }
     
     onMount(() => {
@@ -59,16 +101,37 @@
 
 <RadioGroup>
     <RadioItem bind:group={type} name="cardType" value={CardType.Admin}>Admin</RadioItem>
-    <RadioItem bind:group={type} name="cardType" value={CardType.Person} disabled>Person</RadioItem>
-    <RadioItem bind:group={type} name="cardType" value={CardType.Team} disabled>Team</RadioItem>
+    <RadioItem bind:group={type} name="cardType" value={CardType.Person}>Person</RadioItem>
+<!--    <RadioItem bind:group={type} name="cardType" value={CardType.Team} disabled>Team</RadioItem>-->
     <RadioItem bind:group={type} name="cardType" value={CardType.Credits}>Credits</RadioItem>
-    <RadioItem bind:group={type} name="cardType" value={CardType.Reward} disabled>Reward</RadioItem>
-    <RadioItem bind:group={type} name="cardType" value={CardType.Special} disabled>Special</RadioItem>
+<!--    <RadioItem bind:group={type} name="cardType" value={CardType.Reward} disabled>Reward</RadioItem>-->
+<!--    <RadioItem bind:group={type} name="cardType" value={CardType.Special} disabled>Special</RadioItem>-->
 </RadioGroup>
 
 <div class="card w-1/2 overflow-hidden">
-    <section class="p-4 flex gap-4">
-        {#if type !== CardType.Person}
+    <section class="flex gap-4" class:p-4={type !== CardType.Person}>
+        {#if type === CardType.Person}
+            <div class="table-container">
+                <table class="table table-interactive table-compact">
+                    <tbody>
+                    {#each users as user}
+                        <tr class:table-row-checked="{selectedUser === user.id}" on:click={() => selectUser(user)}>
+                            <td>{user.name}</td>
+                            <td>{user.leader ? 'Leader' : 'Camper'}</td>
+                            {#if user.team}
+                                <td style="background-color: {user.team.colour}" class="{['Helpers', 'Fixers'].includes(user.team.name) ? 'text-black' : ''}">
+                                    {user.team.name}
+                                </td>
+                            {:else}
+                                <td></td>
+                            {/if}
+                            <td>{user.cards.length} {user.cards.length === 1 ? 'card' : 'cards'}</td>
+                        </tr>
+                    {/each}
+                    </tbody>
+                </table>
+            </div>
+        {:else}
             <label class="label basis-2/6">
                 <span>Label</span>
                 <input class="input" type="text" bind:value={label}>

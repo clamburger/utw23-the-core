@@ -7,7 +7,7 @@
 
 <style lang="scss">
     :global(.SystemLog .log) {
-        height: 120px;
+        height: 60px;
     }
 </style>
 

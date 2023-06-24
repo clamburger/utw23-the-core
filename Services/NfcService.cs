@@ -89,7 +89,7 @@ namespace UbertweakNfcReaderWeb.Services
 
             AnsiConsole.MarkupLineInterpolated($"[yellow]Setting desired reader behaviour...[/]");
             behaviour |= ReaderBehaviour.BeepOnPowerOn;
-            behaviour |= ReaderBehaviour.BeepOnInsertion;
+            behaviour &= ~ReaderBehaviour.BeepOnInsertion;
             behaviour &= ~ReaderBehaviour.BeepOnRemoval;
             UpdateReaderBehaviour(readerName, behaviour);
             

@@ -10,7 +10,6 @@
     $: unredeemed = enabled && $card.redeemed === false;
     
     $: className = cardClass($card);
-    $: console.log('class', className);
     
     function cardClass(): string
     {
@@ -44,6 +43,8 @@
             label = 'Admin Card';
         } else if ($card.type === CardType.Credits) {
             label = `${$card.data} Credits`;
+        } else if ($card.type === CardType.Person) {
+            label = `User ID #${$card.data}`;
         } else {
             label = CardType[$card.type];
         }

@@ -115,6 +115,18 @@ namespace UbertweakNfcReaderWeb.Hubs
             await RegisterCard(card);
         }
 
+        public async Task RegisterPersonCard(string uid, int userId)
+        {
+            var card = new Card
+            {
+                Uid = uid,
+                Type = CardType.Person,
+                Data = userId.ToString()
+            };
+
+            await RegisterCard(card);
+        }
+
         public async Task UnregisterAllCards()
         {
             await using var db = new DatabaseContext();
