@@ -14,6 +14,7 @@ public class Card : AnyCard
     public string? Pin { get; set; }
     public string? Data { get; set; }
     public bool? Enabled { get; set; } = true;
+    public User? User { get; set; }
 }
 
 public enum CardType
@@ -22,6 +23,6 @@ public enum CardType
     Person,
     Team,
     Credits,
-    Reward,
-    Special
+    SpecialReward,
+    ProofOfTask
 }

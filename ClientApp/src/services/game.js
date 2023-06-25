@@ -4,7 +4,7 @@ export var DisplayState;
     DisplayState[DisplayState["Disconnected"] = 1] = "Disconnected";
     DisplayState[DisplayState["Ready"] = 2] = "Ready";
     DisplayState[DisplayState["FirstTimeSetup"] = 3] = "FirstTimeSetup";
-    DisplayState[DisplayState["TeamDashboard"] = 4] = "TeamDashboard";
+    DisplayState[DisplayState["LoggedIn"] = 4] = "LoggedIn";
     DisplayState[DisplayState["AdminDashboard"] = 5] = "AdminDashboard";
     DisplayState[DisplayState["RegisteringCards"] = 6] = "RegisteringCards";
     DisplayState[DisplayState["ResettingCards"] = 7] = "ResettingCards";
@@ -16,7 +16,14 @@ export var CardType;
     CardType[CardType["Person"] = 1] = "Person";
     CardType[CardType["Team"] = 2] = "Team";
     CardType[CardType["Credits"] = 3] = "Credits";
-    CardType[CardType["Reward"] = 4] = "Reward";
-    CardType[CardType["Special"] = 5] = "Special";
+    CardType[CardType["SpecialReward"] = 4] = "SpecialReward";
+    CardType[CardType["ProofOfTask"] = 5] = "ProofOfTask";
 })(CardType || (CardType = {}));
+export function redeemable(type) {
+    return [
+        CardType.Credits,
+        CardType.ProofOfTask,
+        CardType.SpecialReward
+    ].includes(type);
+}
 //# sourceMappingURL=game.js.map

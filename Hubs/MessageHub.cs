@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
 using UbertweakNfcReaderWeb.Models;
 using UbertweakNfcReaderWeb.Services;
@@ -15,7 +16,8 @@ namespace UbertweakNfcReaderWeb.Hubs
         Task CardRegistered(Card card);
         Task SystemError(string message);
         Task SystemSuccess(string message);
-
+        Task TeamUpdate(Team team);
+        Task CardUpdate(Card card);
     }
 
     public class MessageHub : Hub<IMessageClient>
@@ -62,6 +64,11 @@ namespace UbertweakNfcReaderWeb.Hubs
             await using var db = new DatabaseContext();
 
             if (CheckIfCardExists(card.Uid)) return;
+
+            if (card.User != null)
+            {
+                card.User = db.Users.Find(card.User.Id);
+            }
             
             db.Add(card);
             await db.SaveChangesAsync();
@@ -117,14 +124,116 @@ namespace UbertweakNfcReaderWeb.Hubs
 
         public async Task RegisterPersonCard(string uid, int userId)
         {
+            await using var db = new DatabaseContext();
+
+            var user = db.Users.Find(userId);
+            
             var card = new Card
             {
                 Uid = uid,
                 Type = CardType.Person,
-                Data = userId.ToString()
+                Data = userId.ToString(),
+                User = user
             };
 
             await RegisterCard(card);
+        }
+
+        public async Task RedeemCard(string uid, int userId)
+        {
+            await using var db = new DatabaseContext();
+            
+            var card = db.Cards.FirstOrDefault(c => c.Uid == uid);
+            var user = db.Users
+                .Include(u => u.Team)
+                .FirstOrDefault(u => u.Id == userId);
+
+            if (card == null || user?.Team == null)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Invalid call.");
+                }
+
+                return;
+            }
+            
+            if (card.Redeemed == true)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Card has already been redeemed.");
+                }
+
+                return;
+            }
+
+            string result;
+
+            switch (card.Type)
+            {
+                case CardType.Credits:
+                {
+                    user.Team.Balance += int.Parse(card.Data);
+                
+                    if (_plexus.PrimaryConnection != null)
+                    {
+                        await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card has been redeemed! {card.Data} credits have been added.");
+                    }
+
+                    result = $"+{card.Data} credits";
+                    break;
+                }
+                case CardType.ProofOfTask:
+                {
+                    if (_plexus.PrimaryConnection != null)
+                    {
+                        await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card has been redeemed! Proof of Task card not yet implemented.");
+                    }
+
+                    result = "not yet implemented (1)";
+                    break;
+                }
+                case CardType.SpecialReward:
+                {
+                    if (_plexus.PrimaryConnection != null)
+                    {
+                        await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card has been redeemed! Special Reward card not yet implemented.");
+                    }
+
+                    result = "not yet implemented (2)";
+                    break;
+                }
+                default:
+                {
+                    if (_plexus.PrimaryConnection != null)
+                    {
+                        await Clients.Client(_plexus.PrimaryConnection).SystemError("Invalid card type.");
+                    }
+
+                    return;
+                }
+            }
+
+            var scan = new Scan
+            {
+                Card = card,
+                User = user,
+                Team = user.Team,
+                DateTime = new DateTime(),
+                Result = result
+            };
+
+            db.Scans.Add(scan);
+
+            card.Redeemed = true;
+            await db.SaveChangesAsync();
+            
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).TeamUpdate(user.Team);
+                await Clients.Client(_plexus.PrimaryConnection).CardUpdate(card);
+            }
         }
 
         public async Task UnregisterAllCards()
@@ -232,6 +341,10 @@ namespace UbertweakNfcReaderWeb.Hubs
                 try
                 {
                     var teamName = line[5];
+                    if (teamName == "Builders")
+                    {
+                        teamName = "Bulders";
+                    }
                     var team = db.Teams.FirstOrDefault(team => team.Name == teamName);
                     if (team != null) user.Team = team;
                 }
@@ -245,6 +358,40 @@ namespace UbertweakNfcReaderWeb.Hubs
             if (_plexus.PrimaryConnection != null)
             {
                 await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"{users.Count} users imported.");
+            }
+        }
+
+        public async Task ResetCard(string uid)
+        {
+            await using var db = new DatabaseContext();
+
+            var card = db.Cards.FirstOrDefault(c => c.Uid == uid);
+
+            if (card == null)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Invalid card.");
+                }
+                return;
+            }
+
+            if (card.Redeemed == true)
+            {
+                card.Redeemed = false;
+                await db.SaveChangesAsync();
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card redemption reset.");
+                    await Clients.Client(_plexus.PrimaryConnection).CardUpdate(card);
+                }
+            }
+            else
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card not redeemed.");
+                }
             }
         }
     }

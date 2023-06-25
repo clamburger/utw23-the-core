@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
 using PCSC.Monitoring;
 using UbertweakNfcReaderWeb.Messaging;
 using UbertweakNfcReaderWeb.Models;
@@ -33,7 +34,10 @@ namespace UbertweakNfcReaderWeb.Services
         private void CardInserted(object? sender, CardInsertedEventArgs e)
         {
             using var db = new DatabaseContext();
-            var card = db.Cards.FirstOrDefault(c => c.Uid == e.Uid) ?? new AnyCard { Uid = e.Uid };
+            var card = db.Cards
+                .Include(c => c.User)
+                .ThenInclude(u => u.Team)
+                .FirstOrDefault(c => c.Uid == e.Uid) ?? new AnyCard { Uid = e.Uid };
 
             _mediator.Publish(new CardInserted { Card = card });
         }

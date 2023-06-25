@@ -1,6 +1,6 @@
 ﻿<script lang="ts">
     import {type Card, CardType, DisplayState, type RegisteredCard} from "../../services/game";
-    import {addLog, card, cardInserted, changeState, clearAlert, connection, showAlert} from "../../stores";
+    import {addLog, card, updateCard, changeState, clearAlert, connection, showAlert} from "../../stores";
     import {onMount} from "svelte";
     import {RadioGroup, RadioItem, SlideToggle} from '@skeletonlabs/skeleton';
     import wretch from 'wretch';
@@ -63,7 +63,7 @@
     }
     
     function cardRegisteredHandler(_card: RegisteredCard) {
-        cardInserted(_card);
+        updateCard(_card);
         
         addLog(`${CardType[_card.type]} card registered [${_card.number || 'no label'}]`);
         

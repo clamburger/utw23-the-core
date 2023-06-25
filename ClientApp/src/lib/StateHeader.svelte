@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { DisplayState } from "../services/game";
-    import { state } from "../stores";
+    import { state, user, team } from "../stores";
 </script>
 
 <h1 class="text-5xl font-bold">
@@ -19,6 +19,10 @@
     {:else if $state === DisplayState.Ready}
         <span class='bg-gradient-to-br from-lime-300 to-emerald-500 bg-clip-text text-transparent box-decoration-clone capitalize'>
             Ready to scan
+        </span>
+    {:else if $state === DisplayState.LoggedIn}
+        <span class='bg-gradient-to-br from-blue-300 to-green-500 bg-clip-text text-transparent box-decoration-clone capitalize'>
+            Welcome, {$user.name}.
         </span>
     {:else if $state === DisplayState.ResettingCards}
         <span class='bg-gradient-to-br from-orange-500 to-yellow-300 bg-clip-text text-transparent box-decoration-clone capitalize'>

@@ -1,13 +1,13 @@
 <script lang="ts">
-    import { alert, card } from '../stores'
-    import {CardType} from "../services/game";
+    import {alert, card, state} from '../stores'
+    import {CardType, DisplayState, redeemable} from "../services/game";
 
     $: registered = $card && $card.id;
     $: unregistered = $card && !$card.id;
     $: enabled = registered && $card.enabled;
     $: disabled = registered && !$card.enabled;
     $: redeemed = enabled && $card.redeemed;
-    $: unredeemed = enabled && $card.redeemed === false;
+    $: unredeemed = enabled && redeemable($card.type) && !redeemed;
     
     $: className = cardClass($card);
     
@@ -22,10 +22,19 @@
         if (disabled) {
             return 'disabled';
         }
+        if (redeemed && $state === DisplayState.Ready) {
+            return 'unredeemed';
+        }
+        if (redeemed && $state === DisplayState.LoggedIn) {
+            return 'active';
+        }
         if (redeemed) {
             return 'redeemed';
         }
-        if (unredeemed) {
+        if ($alert?.type === 'unsupported') {
+            return 'unredeemed';
+        }
+        if (unredeemed && $alert?.type !== 'success') {
             return 'unredeemed';
         }
         return 'active';
@@ -44,7 +53,7 @@
         } else if ($card.type === CardType.Credits) {
             label = `${$card.data} Credits`;
         } else if ($card.type === CardType.Person) {
-            label = `User ID #${$card.data}`;
+            label = `${$card.user.name}`;
         } else {
             label = CardType[$card.type];
         }
@@ -77,11 +86,19 @@
             @apply opacity-50;
         }
     }
+    
+    .detail {
+        @apply my-2 font-bold py-1 px-2;
+    }
 
     .active, .redeemed {
         @apply bg-success-500 text-on-success-token shadow-inner;
 
         box-shadow: 0 0 50px theme('colors.success.700');
+        
+        .detail {
+            @apply bg-success-900 text-white;
+        }
     }
 
     .unregistered {
@@ -94,12 +111,20 @@
         @apply bg-error-500 text-on-error-token shadow-inner;
 
         box-shadow: 0 0 50px theme('colors.error.700');
+        
+        .detail {
+            @apply bg-error-900 text-white;
+        }
     }
     
     .unredeemed {
         @apply bg-tertiary-500 text-on-tertiary-token shadow-inner;
 
         box-shadow: 0 0 50px theme('colors.tertiary.700');
+        
+        .detail {
+            @apply bg-tertiary-900 text-white;
+        }
     }
 
     @keyframes pulse {
@@ -122,7 +147,7 @@
                 <div>Touch card to reader</div>
             {:else if disabled}
                 <div class="font-bold text-2xl line-through opacity-50">{cardLabel()}</div>
-                <div class="my-2 font-bold bg-error-900 text-white py-1 px-2">This card is inoperative.<br>Please return it to the box.</div>
+                <div class="detail">This card is inoperative.<br>Please return it to the box.</div>
             {:else if unregistered}
                 <div class="font-bold text-2xl opacity-50">Unregistered card</div>
             {:else}
@@ -130,7 +155,15 @@
             {/if}
 
             {#if redeemed}
-                <div class="my-2 font-bold bg-success-900 text-white py-1 px-2">Card has been redeemed.<br>Please return it to the box.</div>
+                {#if $state !== DisplayState.LoggedIn || $alert?.code === 'already-redeemed'}
+                    <div class="detail text-sm">Card has already been redeemed. Please return it to the box.</div>
+                {:else}
+                    <div class="detail text-sm">Card successfully redeemed.<br>Please return it to the box.</div>
+                {/if}
+            {/if}
+
+            {#if unredeemed && $state === DisplayState.Ready}
+                <div class="detail">Not yet redeemed</div>
             {/if}
         </div>
         

@@ -3,7 +3,7 @@ export enum DisplayState {
     Disconnected,
     Ready,
     FirstTimeSetup,
-    TeamDashboard,
+    LoggedIn,
     AdminDashboard,
     RegisteringCards,
     ResettingCards,
@@ -15,8 +15,8 @@ export enum CardType {
     Person,
     Team,
     Credits,
-    Reward,
-    Special
+    SpecialReward,
+    ProofOfTask
 }
 
 export interface Card {
@@ -30,5 +30,28 @@ export interface RegisteredCard extends Card {
     redeemed: boolean,
     pin?: string,
     data?: any,
-    enabled: boolean
+    enabled: boolean,
+    user?: User
+}
+
+export interface User {
+    id: number;
+    team?: Team;
+    leader: boolean;
+}
+
+export interface Team {
+    id: number;
+    name: string;
+    colour?: string
+    pin?: string;
+    balance: number;
+}
+
+export function redeemable(type: CardType): boolean {
+    return [
+        CardType.Credits,
+        CardType.ProofOfTask,
+        CardType.SpecialReward
+    ].includes(type);
 }

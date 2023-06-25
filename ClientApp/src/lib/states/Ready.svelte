@@ -4,7 +4,7 @@
         changeState,
         clearAlert,
         connection,
-        showAlert
+        showAlert, updateUser
     } from "../../stores";
     import {onMount} from "svelte";
 
@@ -17,8 +17,11 @@
         
         if (_card.type === CardType.Admin) {
             changeState(DisplayState.AdminDashboard);
-        } else if (_card.type === CardType.Team) {
-            changeState(DisplayState.TeamDashboard);
+        } else if (_card.type === CardType.Person) {
+            updateUser(_card.user);
+            changeState(DisplayState.LoggedIn);
+        } else if (_card.redeemed) {
+            showAlert('info', '', 'already-redeemed');
         }
     }
 

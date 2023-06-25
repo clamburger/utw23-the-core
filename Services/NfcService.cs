@@ -130,7 +130,7 @@ namespace UbertweakNfcReaderWeb.Services
         private void CardInsertedInternal(object sender, CardStatusEventArgs e)
         {
             string uid;
-            
+
             try
             {
                 uid = GetCardUid(e.ReaderName);
@@ -138,6 +138,11 @@ namespace UbertweakNfcReaderWeb.Services
             catch (UnreadableUidException)
             {
                 AnsiConsole.MarkupLineInterpolated($"[lime]Card detected:[/] [red]unknown UID[/]");
+                return;
+            }
+            catch (NoSmartcardException)
+            {
+                // No card actually inserted - can occur on connection of reader
                 return;
             }
 

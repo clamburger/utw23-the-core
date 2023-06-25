@@ -1,9 +1,10 @@
 ﻿<script lang="ts">
-    import { type Card, DisplayState } from '../services/game';
+    import {type Card, DisplayState, type Team} from '../services/game';
     import { setupSignalRConnection } from '../services/hub';
     import StateHeader from './StateHeader.svelte';
     import {
         alert,
+        team,
         connection,
         state,
         addLog,
@@ -11,7 +12,7 @@
         changeState,
         showAlert,
         clearAlert,
-        cardInserted
+        updateCard, updateTeam, card
     } from "../stores";
     import FirstTimeSetup from "./states/FirstTimeSetup.svelte";
     import AdminDashboard from "./states/AdminDashboard.svelte";
@@ -20,6 +21,7 @@
     import Disconnected from "./states/Disconnected.svelte";
     import Ready from "./states/Ready.svelte";
     import TeamManagement from "./states/TeamManagement.svelte";
+    import LoggedIn from "./states/LoggedIn.svelte";
 
     $connection = setupSignalRConnection('/api/hub', {});
 
@@ -52,7 +54,7 @@
     });
     
     $connection.on('CardInserted', (_card: Card) => {
-        cardInserted(_card);
+        updateCard(_card);
         addLog(`Card scanned: ${_card.uid}`);
     });
 
@@ -61,6 +63,18 @@
         // addLog('Card removed');
         clearAlert();
     });
+    
+    $connection.on('TeamUpdate', (_team: Team) => {
+       if (_team.id === $team?.id) {
+           updateTeam(_team);
+       } 
+    });
+    
+    $connection.on('CardUpdate', (_card: Card) => {
+        if (_card.id === $card?.id) {
+            updateCard(_card);
+        }
+    })
 </script>
 
 <div class="flex flex-col flex-grow space-y-6 items-center">
@@ -70,6 +84,8 @@
         <FirstTimeSetup />
     {:else if $state === DisplayState.Ready}
         <Ready />
+    {:else if $state === DisplayState.LoggedIn}
+        <LoggedIn />
     {:else if $state === DisplayState.AdminDashboard}
         <AdminDashboard />
     {:else if $state === DisplayState.ResettingCards}
