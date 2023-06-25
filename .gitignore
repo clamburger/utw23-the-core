@@ -365,3 +365,4 @@ FodyWeavers.xsd
 
 ClientApp/src/**/*.js
 ClientApp/src/**/*.js.map
+.idea

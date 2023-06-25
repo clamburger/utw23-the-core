@@ -21,7 +21,15 @@ namespace UbertweakNfcReaderWeb
 
         // The following configures EF to create a Sqlite database file in the
         // special "local" folder for your platform.
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite($"Data Source={DbPath}");
+        // protected override void OnConfiguring(DbContextOptionsBuilder options)
+            // => options.UseSqlite($"Data Source={DbPath}");
+
+
+            protected override void OnConfiguring(DbContextOptionsBuilder options)
+            {
+                var connectionString = "server=localhost;user=root;password=ubertweak;database=ubertweak";
+                var serverVersion = new MySqlServerVersion(new Version(8, 0, 33));
+                options.UseMySql(connectionString, serverVersion);
+            }
     }
 }

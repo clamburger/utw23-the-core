@@ -24,10 +24,12 @@
             .json(result => {
                 users = result.sort(
                     firstBy((a) => a.team?.name)
-                        .thenBy('leader', -1)
+                        //.thenBy('leader', -1)
                         .thenBy('name')
                 );
-                if (selectedUser === undefined) {
+                if (users.length === 0) {
+                    // do nothing
+                } else if (selectedUser === undefined) {
                     selectedUser = users[0].id;
                 } else {
                     var index = users.findIndex(u => u.id === selectedUser);

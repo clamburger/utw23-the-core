@@ -39,7 +39,7 @@ export function changeState(_state: DisplayState): void {
     state.set(_state);
 }
 
-export function showAlert(type: 'success' | 'warning' | 'error' | 'info', message: string, code: string): void {
+export function showAlert(type: 'success' | 'warning' | 'error' | 'info', message: string, code?: string): void {
     alert.set({type, message, code})
 }
 
