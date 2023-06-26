@@ -7,7 +7,8 @@ public class ShopItem
     public required ShopItemType Type { get; set; }
     public required int Price { get; set; }
     public Team? Owner { get; set; }
-    public required bool Available { get; set; } = false;
+    public bool Available { get; set; } = false;
+    public bool Redeemed { get; set; } = false;
 }
 
 public enum ShopItemType

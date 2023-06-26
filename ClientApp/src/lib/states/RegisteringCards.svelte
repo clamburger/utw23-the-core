@@ -1,5 +1,5 @@
 ﻿<script lang="ts">
-    import {type Card, CardType, DisplayState, type RegisteredCard} from "../../services/game";
+    import {type Card, CardType, DisplayState, type RegisteredCard, type ShopItem} from "../../services/game";
     import {addLog, card, updateCard, changeState, clearAlert, connection, showAlert} from "../../stores";
     import {onMount} from "svelte";
     import {RadioGroup, RadioItem, SlideToggle} from '@skeletonlabs/skeleton';
@@ -10,12 +10,15 @@
     let type = CardType.Admin;
     let label = '0x00';
     let credits = 100;
+    let item;
     
     let users = [];
+    let items: ShopItem[] = [];
     let selectedUser: number;
     
     onMount(() => {
         fetchUsers();
+        fetchItems();
     });
     
     function fetchUsers() {
@@ -37,6 +40,19 @@
                 }
             });
     }
+    
+    function fetchItems() {
+        wretch('/api/Admin/shop-items')
+            .get()
+            .json(result => {
+                items = result
+                    .filter(item => !item.owner)
+                    .sort(
+                    firstBy('type')
+                        .thenBy((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}))
+                );
+            });
+    }
 
     function performRegistration() {
         clearAlert();
@@ -51,6 +67,8 @@
             } else {
                 $connection.invoke('RegisterPersonCard', $card.uid, selectedUser);
             }
+        } else if (type === CardType.SpecialReward) {
+            $connection.invoke('RegisterSpecialRewardCard', $card.uid, item, label);
         } else {
             showAlert("error", "Unsupported card type selected.");
         }
@@ -99,6 +117,8 @@
             $connection.off('CardRegistered', cardRegisteredHandler);
         }
     });
+    
+    $: console.log(item);
 </script>
 
 <RadioGroup>
@@ -106,7 +126,7 @@
     <RadioItem bind:group={type} name="cardType" value={CardType.Person}>Person</RadioItem>
 <!--    <RadioItem bind:group={type} name="cardType" value={CardType.Team} disabled>Team</RadioItem>-->
     <RadioItem bind:group={type} name="cardType" value={CardType.Credits}>Credits</RadioItem>
-<!--    <RadioItem bind:group={type} name="cardType" value={CardType.Reward} disabled>Reward</RadioItem>-->
+    <RadioItem bind:group={type} name="cardType" value={CardType.SpecialReward}>Reward</RadioItem>
 <!--    <RadioItem bind:group={type} name="cardType" value={CardType.Special} disabled>Special</RadioItem>-->
 </RadioGroup>
 
@@ -149,6 +169,15 @@
                 <input class="input" type="number" bind:value={credits}>
             </label>
             <div class="basis-2/6"></div>
+        {:else if type === CardType.SpecialReward}
+            <label class="label basis 2/6">
+                <span>Item</span>
+                <select class="select" bind:value={item}>
+                    {#each items as item}
+                        <option value={item.id}>{item.name}</option>
+                    {/each}
+                </select>
+            </label>
         {/if}
     </section>
     <hr>

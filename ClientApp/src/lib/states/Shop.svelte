@@ -17,7 +17,8 @@
             .get()
             .json(result => {
                 items = result.sort(
-                    firstBy((item) => item.available, -1)
+                    firstBy('redeemed', -1)
+                        .thenBy('available', -1)
                         .thenBy('type')
                         .thenBy((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}))
                 );
@@ -25,10 +26,24 @@
     }
     
     function itemClicked(item: ShopItem) {
-        if (!item.owner && item.available) {
-            updateShopItem(item);
-            changeState(DisplayState.ConfirmPurchase);
+        if (item.redeemed) {
+            return;
         }
+        
+        if (!item.owner && !item.available) {
+            return;
+        }
+        
+        if (item.owner && item.owner.id !== $team.id) {
+            return;
+        }
+        
+        if (item.price > $team.balance && (item.owner.id !== $team.id)) {
+            return;
+        }
+        
+        updateShopItem(item);
+        changeState(DisplayState.ConfirmPurchase);
     }
 </script>
 

@@ -123,6 +123,36 @@ namespace UbertweakNfcReaderWeb.Hubs
             await RegisterCard(card);
         }
 
+        public async Task RegisterSpecialRewardCard(string uid, int itemId, string label)
+        {
+            await using var db = new DatabaseContext();
+
+            var item = db.ShopItems
+                .Include(i => i.Owner)
+                .FirstOrDefault(i => i.Id == itemId);
+
+            if (item == null || item.Owner != null)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Item is invalid or already has an owner.");
+                }
+                return;
+            }
+            
+            item.Available = false;
+            
+            var card = new Card
+            {
+                Uid = uid,
+                Number = label,
+                Type = CardType.SpecialReward,
+                Data = itemId.ToString(),
+            };
+
+            await RegisterCard(card);
+        }
+
         public async Task RegisterPersonCard(string uid, int userId)
         {
             await using var db = new DatabaseContext();
@@ -149,7 +179,7 @@ namespace UbertweakNfcReaderWeb.Hubs
                 Name = name,
                 Type = (ShopItemType)type,
                 Price = price,
-                Available = available
+                Available = available,
             };
 
             db.ShopItems.Add(item);
@@ -210,7 +240,7 @@ namespace UbertweakNfcReaderWeb.Hubs
                 {
                     if (_plexus.PrimaryConnection != null)
                     {
-                        await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card has been redeemed! Proof of Task card not yet implemented.");
+                        await Clients.Client(_plexus.PrimaryConnection).SystemError("Not yet implemented.");
                     }
 
                     result = "not yet implemented (1)";
@@ -218,12 +248,15 @@ namespace UbertweakNfcReaderWeb.Hubs
                 }
                 case CardType.SpecialReward:
                 {
+                    var item = db.ShopItems.Find(int.Parse(card.Data));
+                    item.Owner = user.Team;
+                    
                     if (_plexus.PrimaryConnection != null)
                     {
-                        await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card has been redeemed! Special Reward card not yet implemented.");
+                        await Clients.Client(_plexus.PrimaryConnection).SystemSuccess("Card has been redeemed! Item unlocked in The Shop.");
                     }
 
-                    result = "not yet implemented (2)";
+                    result = $"Unlocked shop item \"{item.Name}\"";
                     break;
                 }
                 default:
@@ -465,6 +498,34 @@ namespace UbertweakNfcReaderWeb.Hubs
             }
         }
 
+        public async Task EmulateScanByUid(string uid)
+        {
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).CardRemoved();
+            }
+            
+            await using var db = new DatabaseContext();
+            
+            AnyCard card = db.Cards
+                .Include(c => c.User)
+                .ThenInclude(u => u.Team)
+                .FirstOrDefault(c => c.Uid == uid);
+
+            if (card == null)
+            {
+                card = new AnyCard
+                {
+                    Uid = uid
+                };
+            }
+            
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).CardInserted(card);
+            }
+        }
+
         public async Task EmulateCardRemoved()
         {
             if (_plexus.PrimaryConnection != null)
@@ -502,18 +563,23 @@ namespace UbertweakNfcReaderWeb.Hubs
                 return;
             }
 
-            if (item.Available == false || item.Owner != null || user.Team.Balance < item.Price)
-            {
-                if (_plexus.PrimaryConnection != null)
-                {
-                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Item is unavailable or team has an insufficient balance.");
-                }
-                return;
-            }
+            // if (item.Available == false || item.Owner != null || user.Team.Balance < item.Price)
+            // {
+            //     if (_plexus.PrimaryConnection != null)
+            //     {
+            //         await Clients.Client(_plexus.PrimaryConnection).SystemError("Item is unavailable or team has an insufficient balance.");
+            //     }
+            //     return;
+            // }
 
-            item.Owner = user.Team;
+            if (item.Owner == null)
+            {
+                item.Owner = user.Team;
+                user.Team.Balance -= item.Price;
+            }
+            
             item.Available = false;
-            user.Team.Balance -= item.Price;
+            item.Redeemed = true;
 
             var purchase = new Purchase
             {

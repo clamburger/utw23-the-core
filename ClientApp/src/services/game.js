@@ -31,7 +31,7 @@ export function redeemable(type) {
 }
 export function label(card) {
     if (!card.id) {
-        return 'Unregistered Card.';
+        return 'Unregistered Card';
     }
     let label;
     if (card.type === CardType.Admin) {
@@ -42,6 +42,9 @@ export function label(card) {
     }
     else if (card.type === CardType.Person) {
         label = `${card.user.name}`;
+    }
+    else if (card.type === CardType.SpecialReward) {
+        label = 'Special Reward';
     }
     else {
         label = CardType[card.type];

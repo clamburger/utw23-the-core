@@ -63,7 +63,7 @@ export function redeemable(type: CardType): boolean {
 export function label(card: Card & RegisteredCard): string
 {
     if (!card.id) {
-        return 'Unregistered Card.';
+        return 'Unregistered Card';
     }
 
     let label: string;
@@ -74,6 +74,8 @@ export function label(card: Card & RegisteredCard): string
         label = `${card.data} Credits`;
     } else if (card.type === CardType.Person) {
         label = `${card.user.name}`;
+    } else if (card.type === CardType.SpecialReward) {
+        label = 'Special Reward';
     } else {
         label = CardType[card.type];
     }
@@ -101,4 +103,5 @@ export interface ShopItem
     price: number,
     owner: Team|null,
     available: boolean,
+    redeemed: boolean,
 }

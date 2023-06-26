@@ -6,7 +6,10 @@
     
     export let onClick: () => void = null;
     
-    $: purchasable = item.available && !item.owner && $team.balance > item.price && $team;
+    $: purchasable =
+        ((!item.redeemed && item.owner?.id === $team.id)
+        || (item.available && !item.owner && !item.redeemed && $team.balance > item.price))
+         && $team;
 </script>
 
 <style lang="scss">
@@ -39,7 +42,11 @@
     {/if}
     <div class="p-4 flex justify-between">
         <span>{item.name}</span>
-        {#if !item.available}
+        {#if item.redeemed}
+            <span class="text-gray-400 font-bold">Sold</span>
+        {:else if !item.redeemed && item.owner?.id === $team.id}
+            <span class="text-green-500 font-bold">Free</span>
+        {:else if !item.available}
             <span class="text-gray-400 font-bold">Locked</span>
         {:else if item.price > $team.balance}
             <span class="text-red-500 font-bold">{item.price} cr</span>

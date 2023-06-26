@@ -3,6 +3,7 @@
 
     let id;
     let label = '';
+    let uid = '';
     
     function scanById() {
         if (id) {
@@ -15,6 +16,14 @@
     function scanByLabel() {
         if (label) {
             $connection.invoke("EmulateScanByLabel", label);
+        } else {
+            removeCard();
+        }
+    }
+    
+    function scanByUid() {
+        if (uid) {
+            $connection.invoke("EmulateScanByUid", uid);
         } else {
             removeCard();
         }
@@ -33,6 +42,10 @@
     </form>
     <form class="flex" on:submit|preventDefault={scanByLabel}>
         <input type="text" placeholder="Label" class="input" bind:value={label} />
+        <button class="btn">Scan</button>
+    </form>
+    <form class="flex" on:submit|preventDefault={scanByUid}>
+        <input type="text" placeholder="UID" class="input" bind:value={uid} />
         <button class="btn">Scan</button>
     </form>
 </div>

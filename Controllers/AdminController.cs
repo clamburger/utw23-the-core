@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UbertweakNfcReaderWeb.Models;
@@ -14,7 +16,7 @@ public class AdminController : ControllerBase
     public ActionResult<List<UserDto>> Users()
     {
         var cards = _db.Cards.Where(c => c.Type == CardType.Person);
-        
+            
         var users = _db.Users
             .Include(u => u.Team)
             .ToList()
@@ -42,8 +44,15 @@ public class AdminController : ControllerBase
     [HttpGet("shop-items")]
     public ActionResult<List<ShopItem>> ShopItems()
     {
-        var items = _db.ShopItems.ToList();
+        var items = _db.ShopItems
+            .Include(i => i.Owner)
+            .ToList();
 
         return items;
     }
+}
+
+public class AuthenticationScheme
+{
+    
 }
