@@ -1,6 +1,6 @@
 <script lang="ts">
     import {alert, card, state} from '../stores'
-    import {CardType, DisplayState, redeemable} from "../services/game";
+    import {DisplayState, label, redeemable} from "../services/game";
 
     $: registered = $card && $card.id;
     $: unregistered = $card && !$card.id;
@@ -42,23 +42,7 @@
 
     function cardLabel(): string
     {
-        if (unregistered) {
-            return formatUid($card.uid);
-        }
-        
-        let label;
-        
-        if ($card.type === CardType.Admin) {
-            label = 'Admin Card';
-        } else if ($card.type === CardType.Credits) {
-            label = `${$card.data} Credits`;
-        } else if ($card.type === CardType.Person) {
-            label = `${$card.user.name}`;
-        } else {
-            label = CardType[$card.type];
-        }
-        
-        return label;
+        return registered ? label($card) : formatUid($card.uid);
     }
     
     function formatUid(uid: string): string

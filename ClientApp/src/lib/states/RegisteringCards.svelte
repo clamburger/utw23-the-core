@@ -67,7 +67,7 @@
     function cardRegisteredHandler(_card: RegisteredCard) {
         updateCard(_card);
         
-        addLog(`${CardType[_card.type]} card registered [${_card.number || 'no label'}]`);
+        addLog(`${CardType[_card.type]} card registered (${label(_card)}]`);
         
         if (_card.type === CardType.Person) {
             fetchUsers();

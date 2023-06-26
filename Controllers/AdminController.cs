@@ -38,4 +38,12 @@ public class AdminController : ControllerBase
     {
         public Card[] Cards { get; set; } = Array.Empty<Card>();
     }
+
+    [HttpGet("shop-items")]
+    public ActionResult<List<ShopItem>> ShopItems()
+    {
+        var items = _db.ShopItems.ToList();
+
+        return items;
+    }
 }

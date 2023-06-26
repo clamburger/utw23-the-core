@@ -1,7 +1,8 @@
 import {type Writable, writable} from "svelte/store";
-import type {Card, RegisteredCard, Team, User} from "./services/game";
-import {DisplayState} from "./services/game";
+import type {Card, RegisteredCard, ShopItem, Team, User} from "./services/game";
+import {DisplayState, ShopItemType} from "./services/game";
 import {HubConnection} from "@microsoft/signalr";
+
 
 export const systemLog = writable([]);
 export const card: Writable<Card|RegisteredCard> = writable();
@@ -10,6 +11,7 @@ export const connection: Writable<HubConnection> = writable();
 export const alert: Writable<Alert> = writable();
 export const user: Writable<User> = writable();
 export const team: Writable<Team> = writable();
+export const shopItem: Writable<ShopItem> = writable();
 
 export interface Alert {
     type: 'success' | 'warning' | 'error' | 'info';
@@ -56,6 +58,10 @@ export function updateUser(_user: User): void {
     if (_user.team) {
         updateTeam(_user.team);
     }
+}
+
+export function updateShopItem(_item: ShopItem): void {
+    shopItem.set(_item);
 }
 
 export function signOut(): void {

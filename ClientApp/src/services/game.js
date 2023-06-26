@@ -9,6 +9,9 @@ export var DisplayState;
     DisplayState[DisplayState["RegisteringCards"] = 6] = "RegisteringCards";
     DisplayState[DisplayState["ResettingCards"] = 7] = "ResettingCards";
     DisplayState[DisplayState["TeamManagement"] = 8] = "TeamManagement";
+    DisplayState[DisplayState["Shop"] = 9] = "Shop";
+    DisplayState[DisplayState["ShopManagement"] = 10] = "ShopManagement";
+    DisplayState[DisplayState["ConfirmPurchase"] = 11] = "ConfirmPurchase";
 })(DisplayState || (DisplayState = {}));
 export var CardType;
 (function (CardType) {
@@ -26,4 +29,32 @@ export function redeemable(type) {
         CardType.SpecialReward
     ].includes(type);
 }
+export function label(card) {
+    if (!card.id) {
+        return 'Unregistered Card.';
+    }
+    let label;
+    if (card.type === CardType.Admin) {
+        label = 'Admin Card';
+    }
+    else if (card.type === CardType.Credits) {
+        label = `${card.data} Credits`;
+    }
+    else if (card.type === CardType.Person) {
+        label = `${card.user.name}`;
+    }
+    else {
+        label = CardType[card.type];
+    }
+    return label;
+}
+export function inShop(state) {
+    return [DisplayState.Shop, DisplayState.ConfirmPurchase].includes(state);
+}
+export var ShopItemType;
+(function (ShopItemType) {
+    ShopItemType[ShopItemType["StandardLego"] = 0] = "StandardLego";
+    ShopItemType[ShopItemType["SpecialLego"] = 1] = "SpecialLego";
+    ShopItemType[ShopItemType["SpecialReward"] = 2] = "SpecialReward";
+})(ShopItemType || (ShopItemType = {}));
 //# sourceMappingURL=game.js.map

@@ -4,6 +4,10 @@
   import SystemLog from "./lib/SystemLog.svelte";
   import CardReader from "./lib/CardReader.svelte";
   import Logo from "./lib/svg/Logo.svelte";
+  import CardEmulator from "./lib/CardEmulator.svelte";
+  import {DisplayState, inShop} from "./services/game";
+  import {state} from "./stores";
+  import LogoShop from "./lib/svg/LogoShop.svelte";
 </script>
 
 <style lang="scss">
@@ -14,15 +18,25 @@
     .logo {
         max-width: 400px;
     }
+    
+    :global(.footer > *) {
+        flex-grow: 1;
+    }
 </style>
 
 <AppShell>
     <div class="logo mx-auto my-4">
-        <Logo />
+        {#if inShop($state)}
+            <LogoShop />
+        {:else}
+            <Logo />
+        {/if}
     </div>
     
     <div class="p-4">
-        <CardReader />
+        {#if $state !== DisplayState.Shop}
+            <CardReader />
+        {/if}
     </div>
     
     <div class="container mx-auto flex justify-center flex-grow px-8 pb-2 pt-0">
@@ -30,6 +44,9 @@
     </div>
 
     <svelte:fragment slot="footer">
-        <SystemLog />
+        <div class="flex footer">
+            <SystemLog />
+            <CardEmulator />
+        </div>
     </svelte:fragment>
 </AppShell>

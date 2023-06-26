@@ -12,6 +12,7 @@ public class ShopItem
 
 public enum ShopItemType
 {
-    Standard,
-    Special
+    StandardLego,
+    SpecialLego,
+    SpecialReward
 }

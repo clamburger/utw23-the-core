@@ -3,46 +3,64 @@
     import { state, user, team } from "../stores";
 </script>
 
+<style lang="scss">
+    .header {
+        @apply bg-gradient-to-br bg-clip-text text-transparent box-decoration-clone;
+    }
+</style>
+
 <h1 class="text-5xl font-bold">
     {#if $state === DisplayState.Connecting}
-        <span class='bg-gradient-to-br from-red-500 to-red-300 bg-clip-text text-transparent box-decoration-clone capitalize'>
+        <span class='header from-red-500 to-red-300'>
             Connecting...
         </span>
     {:else if $state === DisplayState.Disconnected}
-        <span class='bg-gradient-to-br from-red-500 to-red-700 bg-clip-text text-transparent box-decoration-clone capitalize'>
-            Not connected
+        <span class='header from-red-500 to-red-700'>
+            Not Connected
         </span>
     {:else if $state === DisplayState.FirstTimeSetup}
-        <span class='bg-gradient-to-br from-neutral-50 to-stone-500 bg-clip-text text-transparent box-decoration-clone capitalize'>
-            First time setup
+        <span class='header from-neutral-50 to-stone-500'>
+            First Time Setup
         </span>
     {:else if $state === DisplayState.Ready}
-        <span class='bg-gradient-to-br from-lime-300 to-emerald-500 bg-clip-text text-transparent box-decoration-clone capitalize'>
-            Ready to scan
+        <span class='header from-lime-300 to-emerald-500'>
+            Ready To Scan
         </span>
     {:else if $state === DisplayState.LoggedIn}
-        <span class='bg-gradient-to-br from-blue-300 to-green-500 bg-clip-text text-transparent box-decoration-clone capitalize'>
+        <span class='header from-blue-300 to-green-500'>
+            Welcome, {$user.name}.
+        </span>
+    {:else if $state === DisplayState.Shop}
+        <span class='header from-yellow-400 to-blue-400'>
             Welcome, {$user.name}.
         </span>
     {:else if $state === DisplayState.ResettingCards}
-        <span class='bg-gradient-to-br from-orange-500 to-yellow-300 bg-clip-text text-transparent box-decoration-clone capitalize'>
-            Resetting cards
+        <span class='header from-orange-500 to-yellow-300'>
+            Resetting Cards
         </span>
     {:else if $state === DisplayState.RegisteringCards}
-        <span class='bg-gradient-to-br from-yellow-500 to-orange-300 bg-clip-text text-transparent box-decoration-clone capitalize'>
-            Registering cards
+        <span class='header from-yellow-500 to-orange-300'>
+            Registering Cards
         </span>
     {:else if $state === DisplayState.AdminDashboard}
-        <span class='bg-gradient-to-br from-blue-500 to-blue-300 bg-clip-text text-transparent box-decoration-clone capitalize'>
-            Admin dashboard
+        <span class='header from-blue-500 to-blue-300'>
+            Admin Dashboard
         </span>
     {:else if $state === DisplayState.TeamManagement}
-        <span class='bg-gradient-to-br from-blue-100 to-blue-500 bg-clip-text text-transparent box-decoration-clone capitalize'>
-            Team management
+        <span class='header from-blue-100 to-blue-500'>
+            Team Management
+        </span>
+    {:else if $state === DisplayState.ShopManagement}
+        <span class="header from-yellow-400 to-blue-400">
+            Shop Management
+        </span>
+    {:else if $state === DisplayState.ConfirmPurchase}
+        <span class="header from-yellow-400 to-blue-400">
+            Tap Leader Card to Confirm Purchase
         </span>
     {:else}
-        <span class='bg-gradient-to-br from-stone-500 to-slate-300 bg-clip-text text-transparent box-decoration-clone capitalize'>
-            Unknown state    
+        <span class='header from-stone-500 to-slate-300'>
+            Unknown State    
         </span>
     {/if}
 </h1>

@@ -1,5 +1,5 @@
 ﻿<script lang="ts">
-    import {type Card, DisplayState, type Team} from '../services/game';
+    import {type Card, DisplayState, label, type Team} from '../services/game';
     import { setupSignalRConnection } from '../services/hub';
     import StateHeader from './StateHeader.svelte';
     import {
@@ -22,6 +22,9 @@
     import Ready from "./states/Ready.svelte";
     import TeamManagement from "./states/TeamManagement.svelte";
     import LoggedIn from "./states/LoggedIn.svelte";
+    import ShopManagement from "./states/ShopManagement.svelte";
+    import Shop from "./states/Shop.svelte";
+    import ConfirmPurchase from "./states/ConfirmPurchase.svelte";
 
     $connection = setupSignalRConnection('/api/hub', {});
 
@@ -55,7 +58,7 @@
     
     $connection.on('CardInserted', (_card: Card) => {
         updateCard(_card);
-        addLog(`Card scanned: ${_card.uid}`);
+        addLog(`Card scanned: ${_card.uid} (${label(_card)})`);
     });
 
     $connection.on('CardRemoved', () => {
@@ -96,5 +99,11 @@
         <TeamManagement />
     {:else if $state === DisplayState.Disconnected}
         <Disconnected />
+    {:else if $state === DisplayState.ShopManagement}
+        <ShopManagement />
+    {:else if $state === DisplayState.Shop}
+        <Shop />
+    {:else if $state === DisplayState.ConfirmPurchase}
+        <ConfirmPurchase />
     {/if}
 </div>

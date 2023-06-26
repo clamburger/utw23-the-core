@@ -9,6 +9,8 @@ namespace UbertweakNfcReaderWeb
         public DbSet<User> Users => Set<User>();
         public DbSet<Team> Teams => Set<Team>();
         public DbSet<Scan> Scans => Set<Scan>();
+        public DbSet<Purchase> Purchases => Set<Purchase>();
+        public DbSet<ShopItem> ShopItems => Set<ShopItem>();
 
         public readonly string DbPath;
 
@@ -27,7 +29,7 @@ namespace UbertweakNfcReaderWeb
 
             protected override void OnConfiguring(DbContextOptionsBuilder options)
             {
-                var connectionString = "server=localhost;user=root;password=ubertweak;database=ubertweak";
+                var connectionString = "server=localhost;user=ubertweak;password=ubertweak;database=ubertweak";
                 var serverVersion = new MySqlServerVersion(new Version(8, 0, 33));
                 options.UseMySql(connectionString, serverVersion);
             }

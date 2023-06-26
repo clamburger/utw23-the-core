@@ -18,6 +18,7 @@ namespace UbertweakNfcReaderWeb.Hubs
         Task SystemSuccess(string message);
         Task TeamUpdate(Team team);
         Task CardUpdate(Card card);
+        Task PurchaseSuccessful(ShopItem item);
     }
 
     public class MessageHub : Hub<IMessageClient>
@@ -139,6 +140,27 @@ namespace UbertweakNfcReaderWeb.Hubs
             await RegisterCard(card);
         }
 
+        public async Task AddShopItem(string name, int type, int price, bool available)
+        {
+            await using var db = new DatabaseContext();
+
+            var item = new ShopItem
+            {
+                Name = name,
+                Type = (ShopItemType)type,
+                Price = price,
+                Available = available
+            };
+
+            db.ShopItems.Add(item);
+            await db.SaveChangesAsync();
+            
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Shop item #{item.Id} created.");
+            }
+        }
+
         public async Task RedeemCard(string uid, int userId)
         {
             await using var db = new DatabaseContext();
@@ -220,7 +242,7 @@ namespace UbertweakNfcReaderWeb.Hubs
                 Card = card,
                 User = user,
                 Team = user.Team,
-                DateTime = new DateTime(),
+                DateTime = DateTime.Now,
                 Result = result
             };
 
@@ -392,6 +414,124 @@ namespace UbertweakNfcReaderWeb.Hubs
                 {
                     await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card not redeemed.");
                 }
+            }
+        }
+
+        public async Task EmulateScanById(int id)
+        {
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).CardRemoved();
+            }
+            
+            await using var db = new DatabaseContext();
+
+            var card = db.Cards
+                .Include(c => c.User)
+                .ThenInclude(u => u.Team)
+                .FirstOrDefault(c => c.Id == id);
+
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).CardInserted(card);
+            }
+        }
+
+        public async Task EmulateScanByLabel(string label)
+        {
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).CardRemoved();
+            }
+
+            await using var db = new DatabaseContext();
+
+            var card = db.Cards
+                .Include(c => c.User)
+                .ThenInclude(u => u.Team)
+                .FirstOrDefault(c => c.Number == label);
+
+            if (card == null)
+            {
+                card = db.Cards
+                    .Include(c => c.User)
+                    .ThenInclude(u => u.Team)
+                    .FirstOrDefault(c => c.User.Name == label);
+            }
+
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).CardInserted(card);
+            }
+        }
+
+        public async Task EmulateCardRemoved()
+        {
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).CardRemoved();
+            }
+        }
+
+        public async Task ConfirmPurchase(int userId, int leaderId, int itemId)
+        {
+            await using var db = new DatabaseContext();
+
+            var user = db.Users.Include(u => u.Team)
+                .FirstOrDefault(u => u.Id == userId);
+            var leader = db.Users.Find(leaderId);
+            var item = db.ShopItems.Include(i => i.Owner)
+                .FirstOrDefault(i => i.Id == itemId);
+
+            if (item == null || user == null)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Invalid user or card.");
+                }
+
+                return;
+            }
+
+            if (user.Team == null)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("User doesn't belong to a team.");
+                }
+                return;
+            }
+
+            if (item.Available == false || item.Owner != null || user.Team.Balance < item.Price)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Item is unavailable or team has an insufficient balance.");
+                }
+                return;
+            }
+
+            item.Owner = user.Team;
+            item.Available = false;
+            user.Team.Balance -= item.Price;
+
+            var purchase = new Purchase
+            {
+                DateTime = DateTime.Now,
+                User = user,
+                Leader = leader,
+                ShopItem = item,
+                Team = user.Team
+            };
+
+            db.Purchases.Add(purchase);
+
+            await db.SaveChangesAsync();
+            
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).PurchaseSuccessful(item);
+                await Clients.Client(_plexus.PrimaryConnection).TeamUpdate(user.Team);
             }
         }
     }

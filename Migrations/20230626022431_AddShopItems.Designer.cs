@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UbertweakNfcReaderWeb;
 
@@ -10,9 +11,11 @@ using UbertweakNfcReaderWeb;
 namespace UbertweakNfcReaderWeb.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20230626022431_AddShopItems")]
+    partial class AddShopItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,9 +69,6 @@ namespace UbertweakNfcReaderWeb.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("LeaderId")
-                        .HasColumnType("int");
-
                     b.Property<int>("ShopItemId")
                         .HasColumnType("int");
 
@@ -79,8 +79,6 @@ namespace UbertweakNfcReaderWeb.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LeaderId");
 
                     b.HasIndex("ShopItemId");
 
@@ -212,12 +210,6 @@ namespace UbertweakNfcReaderWeb.Migrations
 
             modelBuilder.Entity("UbertweakNfcReaderWeb.Models.Purchase", b =>
                 {
-                    b.HasOne("UbertweakNfcReaderWeb.Models.User", "Leader")
-                        .WithMany()
-                        .HasForeignKey("LeaderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("UbertweakNfcReaderWeb.Models.ShopItem", "ShopItem")
                         .WithMany()
                         .HasForeignKey("ShopItemId")
@@ -235,8 +227,6 @@ namespace UbertweakNfcReaderWeb.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Leader");
 
                     b.Navigation("ShopItem");
 
