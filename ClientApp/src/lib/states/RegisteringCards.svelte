@@ -1,5 +1,5 @@
 ﻿<script lang="ts">
-    import {type Card, CardType, DisplayState, type RegisteredCard, type ShopItem} from "../../services/game";
+    import {type Card, CardType, DisplayState, type RegisteredCard, type ShopItem, label as cardLabel} from "../../services/game";
     import {addLog, card, updateCard, changeState, clearAlert, connection, showAlert} from "../../stores";
     import {onMount} from "svelte";
     import {RadioGroup, RadioItem, SlideToggle} from '@skeletonlabs/skeleton';
@@ -46,7 +46,7 @@
             .get()
             .json(result => {
                 items = result
-                    .filter(item => !item.owner)
+                    .filter(item => !item.owner && !item.rewardCard)
                     .sort(
                     firstBy('type')
                         .thenBy((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}))
@@ -85,7 +85,7 @@
     function cardRegisteredHandler(_card: RegisteredCard) {
         updateCard(_card);
         
-        addLog(`${CardType[_card.type]} card registered (${label(_card)}]`);
+        addLog(`${CardType[_card.type]} card registered (${cardLabel(_card)}]`);
         
         if (_card.type === CardType.Person) {
             fetchUsers();
@@ -117,8 +117,6 @@
             $connection.off('CardRegistered', cardRegisteredHandler);
         }
     });
-    
-    $: console.log(item);
 </script>
 
 <RadioGroup>

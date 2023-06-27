@@ -4,8 +4,6 @@
 
     let importData = '';
     
-    $: console.log(importData.length);
-    
     function removeAllUsers(): void {
         if (!confirm('Are you sure you want to remove all users and teams?')) {
             return;

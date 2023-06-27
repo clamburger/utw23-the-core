@@ -60,4 +60,45 @@ export var ShopItemType;
     ShopItemType[ShopItemType["SpecialLego"] = 1] = "SpecialLego";
     ShopItemType[ShopItemType["SpecialReward"] = 2] = "SpecialReward";
 })(ShopItemType || (ShopItemType = {}));
+export var ItemStatus;
+(function (ItemStatus) {
+    ItemStatus[ItemStatus["Purchasable"] = 0] = "Purchasable";
+    ItemStatus[ItemStatus["PurchasableTooExpensive"] = 1] = "PurchasableTooExpensive";
+    ItemStatus[ItemStatus["OwnedByYou"] = 2] = "OwnedByYou";
+    ItemStatus[ItemStatus["OwnedByOtherTeam"] = 3] = "OwnedByOtherTeam";
+    ItemStatus[ItemStatus["ReservedForYou"] = 4] = "ReservedForYou";
+    ItemStatus[ItemStatus["ReservedForOtherTeam"] = 5] = "ReservedForOtherTeam";
+    ItemStatus[ItemStatus["UnclaimedReward"] = 6] = "UnclaimedReward";
+    ItemStatus[ItemStatus["FutureUnlock"] = 7] = "FutureUnlock";
+})(ItemStatus || (ItemStatus = {}));
+export function itemStatus(item, team) {
+    if (item.redeemed) {
+        if (item.owner.id === team.id) {
+            return ItemStatus.OwnedByYou;
+        }
+        else {
+            return ItemStatus.OwnedByOtherTeam;
+        }
+    }
+    if (item.rewardCard) {
+        if (!item.owner) {
+            return ItemStatus.UnclaimedReward;
+        }
+        else if (item.owner.id === team.id) {
+            return ItemStatus.ReservedForYou;
+        }
+        else {
+            return ItemStatus.ReservedForOtherTeam;
+        }
+    }
+    if (!item.available) {
+        return ItemStatus.FutureUnlock;
+    }
+    if (item.price > team.balance) {
+        return ItemStatus.PurchasableTooExpensive;
+    }
+    else {
+        return ItemStatus.Purchasable;
+    }
+}
 //# sourceMappingURL=game.js.map

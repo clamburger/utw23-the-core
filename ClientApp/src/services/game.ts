@@ -104,4 +104,48 @@ export interface ShopItem
     owner: Team|null,
     available: boolean,
     redeemed: boolean,
+    rewardCard: Card|null,
+}
+
+export enum ItemStatus
+{
+    Purchasable,
+    PurchasableTooExpensive,
+    OwnedByYou,
+    OwnedByOtherTeam,
+    ReservedForYou,
+    ReservedForOtherTeam,
+    UnclaimedReward,
+    FutureUnlock,
+}
+
+export function itemStatus(item: ShopItem, team: Team): ItemStatus
+{
+    if (item.redeemed) {
+        if (item.owner.id === team.id) {
+            return ItemStatus.OwnedByYou;
+        } else {
+            return ItemStatus.OwnedByOtherTeam;
+        }
+    }
+    
+    if (item.rewardCard) {
+        if (!item.owner) {
+            return ItemStatus.UnclaimedReward;
+        } else if (item.owner.id === team.id) {
+            return ItemStatus.ReservedForYou;
+        } else {
+            return ItemStatus.ReservedForOtherTeam;
+        }
+    }
+    
+    if (!item.available) {
+        return ItemStatus.FutureUnlock;
+    }
+    
+    if (item.price > team.balance) {
+        return ItemStatus.PurchasableTooExpensive;
+    } else {
+        return ItemStatus.Purchasable;
+    }
 }

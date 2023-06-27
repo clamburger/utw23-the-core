@@ -46,6 +46,7 @@ public class AdminController : ControllerBase
     {
         var items = _db.ShopItems
             .Include(i => i.Owner)
+            .Include(i => i.RewardCard)
             .ToList();
 
         return items;
