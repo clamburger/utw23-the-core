@@ -35,7 +35,7 @@
 {/if}
 
 <div class="flex gap-4">
-    {#if $user?.leader}
+    {#if $user.name === 'Sam Horn'}
         <button class="btn btn-xl variant-filled-primary" on:click={() => changeState(DisplayState.AdminDashboard)}>Admin Management</button>
     {/if}
     <button class="btn btn-xl variant-filled-tertiary" on:click={() => changeState(DisplayState.Shop)}>The Shop</button>

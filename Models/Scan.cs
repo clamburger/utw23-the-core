@@ -6,7 +6,8 @@
         public required Card Card { get; set; }
         public required DateTime DateTime { get; set; }
         public required string Result { get; set; }
-        public required Team Team { get; set; }
+        public Team? Team { get; set; }
         public required User User { get; set; }
+        public string? Category { get; set; }
     }
 }

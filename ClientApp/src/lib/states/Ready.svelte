@@ -20,6 +20,7 @@
         } else if (_card.type === CardType.Person) {
             updateUser(_card.user);
             changeState(DisplayState.LoggedIn);
+            $connection.invoke('LoggedIn', _card.uid, _card.user.id);
         } else if (_card.redeemed) {
             showAlert('info', '', 'already-redeemed');
         }

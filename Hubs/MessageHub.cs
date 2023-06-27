@@ -221,6 +221,7 @@ namespace UbertweakNfcReaderWeb.Hubs
             }
 
             string result;
+            string category;
 
             switch (card.Type)
             {
@@ -234,16 +235,7 @@ namespace UbertweakNfcReaderWeb.Hubs
                     }
 
                     result = $"+{card.Data} credits";
-                    break;
-                }
-                case CardType.ProofOfTask:
-                {
-                    if (_plexus.PrimaryConnection != null)
-                    {
-                        await Clients.Client(_plexus.PrimaryConnection).SystemError("Not yet implemented.");
-                    }
-
-                    result = "not yet implemented (1)";
+                    category = "credits";
                     break;
                 }
                 case CardType.SpecialReward:
@@ -257,6 +249,7 @@ namespace UbertweakNfcReaderWeb.Hubs
                     }
 
                     result = $"Unlocked shop item \"{item.Name}\"";
+                    category = "special";
                     break;
                 }
                 default:
@@ -276,7 +269,8 @@ namespace UbertweakNfcReaderWeb.Hubs
                 User = user,
                 Team = user.Team,
                 DateTime = DateTime.Now,
-                Result = result
+                Result = result,
+                Category = $"redeem/{category}"
             };
 
             db.Scans.Add(scan);
@@ -416,7 +410,7 @@ namespace UbertweakNfcReaderWeb.Hubs
             }
         }
 
-        public async Task ResetCard(string uid)
+        public async Task ResetCard(string uid, int userId)
         {
             await using var db = new DatabaseContext();
 
@@ -431,10 +425,12 @@ namespace UbertweakNfcReaderWeb.Hubs
                 return;
             }
 
+            string result;
+
             if (card.Redeemed == true)
             {
                 card.Redeemed = false;
-                await db.SaveChangesAsync();
+                result = "Card redemption reset";
                 if (_plexus.PrimaryConnection != null)
                 {
                     await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card redemption reset.");
@@ -443,11 +439,24 @@ namespace UbertweakNfcReaderWeb.Hubs
             }
             else
             {
+                result = "Card not reset (not redemeed)";
                 if (_plexus.PrimaryConnection != null)
                 {
                     await Clients.Client(_plexus.PrimaryConnection).SystemSuccess($"Card not redeemed.");
                 }
             }
+
+            var scan = new Scan
+            {
+                Card = card,
+                Category = "admin/reset",
+                DateTime = DateTime.Now,
+                Result = result,
+                User = db.Users.Find(userId)
+            };
+
+            db.Scans.Add(scan);
+            await db.SaveChangesAsync();
         }
 
         public async Task EmulateScanById(int id)
@@ -599,6 +608,29 @@ namespace UbertweakNfcReaderWeb.Hubs
                 await Clients.Client(_plexus.PrimaryConnection).PurchaseSuccessful(item);
                 await Clients.Client(_plexus.PrimaryConnection).TeamUpdate(user.Team);
             }
+        }
+
+        public async Task LoggedIn(string uid, int userId)
+        {
+            await using var db = new DatabaseContext();
+            
+            var card = db.Cards.FirstOrDefault(c => c.Uid == uid);
+            var user = db.Users
+                .Include(u => u.Team)
+                .FirstOrDefault(u => u.Id == userId);
+
+            var scan = new Scan
+            {
+                Card = card,
+                User = user,
+                Team = user.Team,
+                Category = "auth",
+                DateTime = DateTime.Now,
+                Result = "Logged in"
+            };
+
+            db.Scans.Add(scan);
+            await db.SaveChangesAsync();
         }
     }
 }
