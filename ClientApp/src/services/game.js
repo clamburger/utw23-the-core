@@ -59,6 +59,7 @@ export var ShopItemType;
     ShopItemType[ShopItemType["StandardLego"] = 0] = "StandardLego";
     ShopItemType[ShopItemType["SpecialLego"] = 1] = "SpecialLego";
     ShopItemType[ShopItemType["SpecialReward"] = 2] = "SpecialReward";
+    ShopItemType[ShopItemType["Minifig"] = 3] = "Minifig";
 })(ShopItemType || (ShopItemType = {}));
 export var ItemStatus;
 (function (ItemStatus) {

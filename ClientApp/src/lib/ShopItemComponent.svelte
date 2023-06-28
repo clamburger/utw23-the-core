@@ -49,7 +49,7 @@
         </header>
     {:else if item.type === ShopItemType.Minifig}
         <header style="background-color: #B8B8B8">
-            <img src="/item-lego-minifig.jpep" class="image">    
+            <img src="/item-lego-minifig.jpeg" class="image">    
         </header>
     {/if}
     <div class="px-4 py-2 flex justify-between">
