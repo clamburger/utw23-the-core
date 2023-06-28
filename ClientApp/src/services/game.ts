@@ -92,7 +92,8 @@ export enum ShopItemType
 {
     StandardLego,
     SpecialLego,
-    SpecialReward
+    SpecialReward,
+    Minifig
 }
 
 export interface ShopItem

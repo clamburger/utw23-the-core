@@ -47,6 +47,10 @@
         <header style="background-color: #FFFFFF;">
             <img src="/item-lego-special.png" class="image">
         </header>
+    {:else if item.type === ShopItemType.Minifig}
+        <header style="background-color: #B8B8B8">
+            <img src="/item-lego-minifig.jpep" class="image">    
+        </header>
     {/if}
     <div class="px-4 py-2 flex justify-between">
         <span>{item.name}</span>

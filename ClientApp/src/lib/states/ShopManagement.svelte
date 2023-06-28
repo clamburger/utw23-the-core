@@ -18,6 +18,7 @@
     <RadioItem bind:group={type} name="cardType" value={ShopItemType.StandardLego}>Standard Lego</RadioItem>
     <RadioItem bind:group={type} name="cardType" value={ShopItemType.SpecialLego}>Special Lego</RadioItem>
 <!--    <RadioItem bind:group={type} name="cardType" value={ShopItemType.SpecialReward} disabled>Special Reward</RadioItem>-->
+    <RadioItem bind:group={type} name="cardType" value={ShopItemType.Minifig}>Minifig</RadioItem>
 </RadioGroup>
 
 <div class="card w-1/2 overflow-hidden">

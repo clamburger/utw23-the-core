@@ -16,5 +16,6 @@ public enum ShopItemType
 {
     StandardLego,
     SpecialLego,
-    SpecialReward
+    SpecialReward,
+    Minifig
 }
