@@ -150,6 +150,8 @@ namespace UbertweakNfcReaderWeb.Hubs
                 Data = itemId.ToString(),
             };
 
+            item.RewardCard = card;
+
             await RegisterCard(card);
         }
 
