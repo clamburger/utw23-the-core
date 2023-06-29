@@ -16,7 +16,10 @@ namespace UbertweakNfcReaderWeb
 
             // Add services to the container.
             builder.Services.AddRazorPages();
-            builder.Services.AddSignalR();
+            builder.Services.AddSignalR().AddJsonProtocol(options =>
+            {
+                options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
             builder.Services.AddHostedService<Worker>();
             builder.Services.AddSingleton<NfcService>();
             builder.Services.AddSingleton<PlexusService>();
