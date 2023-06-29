@@ -58,6 +58,10 @@
         <span class="header from-yellow-400 to-blue-400">
             Tap Leader Card to Confirm Purchase
         </span>
+    {:else if $state === DisplayState.TeamSummary}
+        <span class="header from-blue-50 to-blue-400">
+            Team Summary
+        </span>
     {:else}
         <span class='header from-stone-500 to-slate-300'>
             Unknown State    

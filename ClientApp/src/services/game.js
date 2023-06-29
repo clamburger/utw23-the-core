@@ -12,6 +12,7 @@ export var DisplayState;
     DisplayState[DisplayState["Shop"] = 9] = "Shop";
     DisplayState[DisplayState["ShopManagement"] = 10] = "ShopManagement";
     DisplayState[DisplayState["ConfirmPurchase"] = 11] = "ConfirmPurchase";
+    DisplayState[DisplayState["TeamSummary"] = 12] = "TeamSummary";
 })(DisplayState || (DisplayState = {}));
 export var CardType;
 (function (CardType) {
@@ -74,7 +75,7 @@ export var ItemStatus;
 })(ItemStatus || (ItemStatus = {}));
 export function itemStatus(item, team) {
     if (item.redeemed) {
-        if (item.owner.id === team.id) {
+        if (item.owner?.id === team.id) {
             return ItemStatus.OwnedByYou;
         }
         else {

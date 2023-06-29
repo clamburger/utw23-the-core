@@ -11,12 +11,12 @@ namespace UbertweakNfcReaderWeb.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly DatabaseContext _db = new();
-    
+
     [HttpGet("users")]
     public ActionResult<List<UserDto>> Users()
     {
         var cards = _db.Cards.Where(c => c.Type == CardType.Person);
-            
+
         var users = _db.Users
             .Include(u => u.Team)
             .ToList()
@@ -51,9 +51,14 @@ public class AdminController : ControllerBase
 
         return items;
     }
-}
 
-public class AuthenticationScheme
-{
-    
+    [HttpGet("teams")]
+    public ActionResult<List<Team>> Teams()
+    {
+        var teams = _db.Teams
+            .Include(t => t.ShopItems)
+            .ToList();
+
+        return teams;
+    }
 }

@@ -1,5 +1,15 @@
 ﻿<script lang="ts">
-    import {addLog, changeState, clearAlert, connection, showAlert, team, updateUser, user} from "../../stores";
+    import {
+        addLog,
+        changeState,
+        clearAlert,
+        connection,
+        showAlert,
+        signOut,
+        team,
+        updateUser,
+        user
+    } from "../../stores";
     import {type Card, CardType, DisplayState, label, redeemable} from "../../services/game";
     import {onMount} from "svelte";
     
@@ -29,4 +39,7 @@
     });
 </script>
 
-<button class="btn variant-filled-secondary" on:click={() => changeState(DisplayState.AdminDashboard)}>Finished</button>
+<div class="flex gap-4">
+    <button class="btn variant-filled-secondary" on:click={() => changeState(DisplayState.AdminDashboard)}>Finished</button>
+    <button class="btn variant-filled-error" on:click={() => signOut()}>Sign Out</button>
+</div>

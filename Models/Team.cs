@@ -12,5 +12,6 @@
         public required string Colour { get; set; }
         public string? Pin { get; set; }
         public int Balance { get; set; }
+        public ICollection<ShopItem> ShopItems { get; } = new List<ShopItem>();
     }
 }

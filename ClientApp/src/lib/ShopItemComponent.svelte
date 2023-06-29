@@ -7,6 +7,7 @@
     $: itemStatus = item ? itemStatusCall(item, $team) : null;
     
     export let onClick: () => void = null;
+    export let admin: boolean = false;
     
     $: purchasable = [ItemStatus.Purchasable, ItemStatus.ReservedForYou].includes(itemStatus);
     $: owned = itemStatus === ItemStatus.OwnedByYou;
@@ -36,20 +37,20 @@
 
 <div class="card card-hover shop-item overflow-hidden"
      class:owner={owned}
-     class:unavailable={!purchasable && !owned}
+     class:unavailable={!purchasable && !owned && !admin}
      class:card-hover={purchasable}
      on:click={() => onClick && onClick()}>
     {#if item.type === ShopItemType.StandardLego}
         <header style="background-color: #EDEDED">
-            <img src="/item-lego-standard.jpeg" class="image">
+            <img src="/item-lego-standard.jpeg" class="image" alt="Pile of assorted Lego pieces">
         </header>
     {:else if item.type === ShopItemType.SpecialLego}
         <header style="background-color: #FFFFFF;">
-            <img src="/item-lego-special.png" class="image">
+            <img src="/item-lego-special.png" class="image" alt="Unmarked small fabric bag">
         </header>
     {:else if item.type === ShopItemType.Minifig}
         <header style="background-color: #B8B8B8">
-            <img src="/item-lego-minifig.jpeg" class="image">    
+            <img src="/item-lego-minifig.jpeg" class="image" alt="Silhouette of a minifig">    
         </header>
     {/if}
     <div class="px-4 py-2 flex justify-between">
@@ -66,7 +67,7 @@
         <!--    <span class="text-gray-400 font-bold">Locked</span>-->
         {:else if itemStatus === ItemStatus.PurchasableTooExpensive}
             <span class="text-red-500 font-bold">{item.price} cr</span>
-        {:else if itemStatus === ItemStatus.Purchasable}
+        {:else if itemStatus === ItemStatus.Purchasable || admin}
             <span class="text-yellow-300 font-bold">{item.price} cr</span>
         {/if}
     </div>

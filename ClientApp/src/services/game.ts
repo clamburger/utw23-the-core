@@ -10,7 +10,8 @@ export enum DisplayState {
     TeamManagement,
     Shop,
     ShopManagement,
-    ConfirmPurchase
+    ConfirmPurchase,
+    TeamSummary
 }
 
 export enum CardType {
@@ -50,6 +51,7 @@ export interface Team {
     colour?: string
     pin?: string;
     balance: number;
+    shopItems: (ShopItem|null)[];
 }
 
 export function redeemable(type: CardType): boolean {
@@ -123,7 +125,7 @@ export enum ItemStatus
 export function itemStatus(item: ShopItem, team: Team): ItemStatus
 {
     if (item.redeemed) {
-        if (item.owner.id === team.id) {
+        if (item.owner?.id === team.id) {
             return ItemStatus.OwnedByYou;
         } else {
             return ItemStatus.OwnedByOtherTeam;

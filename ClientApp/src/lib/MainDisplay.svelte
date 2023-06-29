@@ -25,6 +25,7 @@
     import ShopManagement from "./states/ShopManagement.svelte";
     import Shop from "./states/Shop.svelte";
     import ConfirmPurchase from "./states/ConfirmPurchase.svelte";
+    import TeamSummary from "./states/TeamSummary.svelte";
 
     $connection = setupSignalRConnection('/api/hub', {});
 
@@ -105,5 +106,7 @@
         <Shop />
     {:else if $state === DisplayState.ConfirmPurchase}
         <ConfirmPurchase />
+    {:else if $state === DisplayState.TeamSummary}
+        <TeamSummary />
     {/if}
 </div>

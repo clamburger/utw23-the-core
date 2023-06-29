@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Spectre.Console;
@@ -20,6 +21,10 @@ namespace UbertweakNfcReaderWeb
             builder.Services.AddSingleton<NfcService>();
             builder.Services.AddSingleton<PlexusService>();
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
 
             var app = builder.Build();
 
