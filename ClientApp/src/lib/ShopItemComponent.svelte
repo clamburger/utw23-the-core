@@ -66,9 +66,9 @@
         <!--{:else if itemStatus === ItemStatus.FutureUnlock}-->
         <!--    <span class="text-gray-400 font-bold">Locked</span>-->
         {:else if itemStatus === ItemStatus.PurchasableTooExpensive}
-            <span class="text-red-500 font-bold">{item.price} cr</span>
+            <span class="text-red-500 font-bold whitespace-nowrap">{item.price} cr</span>
         {:else if itemStatus === ItemStatus.Purchasable || admin}
-            <span class="text-yellow-300 font-bold">{item.price} cr</span>
+            <span class="text-yellow-300 font-bold whitespace-nowrap">{item.price} cr</span>
         {/if}
     </div>
     {#if item.owner || item.rewardCard}
