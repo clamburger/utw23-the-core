@@ -134,6 +134,9 @@
                 <div class="detail">This card is inoperative.<br>Please return it to the box.</div>
             {:else if unregistered}
                 <div class="font-bold text-2xl opacity-50">Unregistered card</div>
+            {:else if $card.user && $state === DisplayState.LoggedIn}
+                <div class="font-bold text-7xl pb-3">✓</div>
+                <div class="font-bold text-3xl">Access Granted</div>
             {:else}
                 <div class="font-bold text-2xl">{cardLabel()}</div>
             {/if}
@@ -152,7 +155,7 @@
         </div>
         
         {#if $card}
-            <div class="absolute left-2 bottom-2 text-xs">{@html formatUid($card.uid)}</div>
+            <!-- <div class="absolute left-2 bottom-2 text-xs">{@html formatUid($card.uid)}</div> -->
             {#if $card.number}
                 <div class="font-medium absolute right-2 bottom-1">{$card.number}</div>
             {/if}

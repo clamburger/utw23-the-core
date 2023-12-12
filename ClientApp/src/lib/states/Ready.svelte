@@ -4,9 +4,14 @@
         changeState,
         clearAlert,
         connection,
-        showAlert, updateUser
+        showAlert,
+        updateUser,
+        cardRemoved,
+        signOut,
     } from "../../stores";
     import {onMount} from "svelte";
+
+    let timeout;
 
     function cardInsertedHandler(_card: Card) {
         clearAlert();
@@ -20,7 +25,16 @@
         } else if (_card.type === CardType.Person) {
             updateUser(_card.user);
             changeState(DisplayState.LoggedIn);
-            $connection.invoke('LoggedIn', _card.uid, _card.user.id);
+            // $connection.invoke('LoggedIn', _card.uid, _card.user.id);
+            if (timeout !== undefined) {
+                clearTimeout(timeout);
+            }
+
+            timeout = setTimeout(() => {
+                signOut();
+                cardRemoved();
+            }, 5000);
+
         } else if (_card.redeemed) {
             showAlert('info', '', 'already-redeemed');
         }

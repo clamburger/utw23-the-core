@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { DisplayState } from "../services/game";
-    import { state, user, team } from "../stores";
+    import { state, card, user, team } from "../stores";
 </script>
 
 <style lang="scss">
@@ -9,7 +9,7 @@
     }
 </style>
 
-<h1 class="text-5xl font-bold">
+<h1 class="text-6xl font-bold px-8 py-4 pb-7 rounded-xl" style='background-color: rgba(0, 0, 0, 0.7)'>
     {#if $state === DisplayState.Connecting}
         <span class='header from-red-500 to-red-300'>
             Connecting...
@@ -23,12 +23,12 @@
             First Time Setup
         </span>
     {:else if $state === DisplayState.Ready}
-        <span class='header from-lime-300 to-emerald-500'>
+        <span class='header from-neutral-50 to-red-400'>
             Ready To Scan
         </span>
     {:else if $state === DisplayState.LoggedIn}
-        <span class='header from-blue-300 to-green-500'>
-            Welcome, {$user.name}.
+        <span class='header from-lime-300 to-green-500'>
+            <span class='font-normal'>Welcome,</span> {$user.name}.
         </span>
     {:else if $state === DisplayState.Shop}
         <span class='header from-yellow-400 to-blue-400'>

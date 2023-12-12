@@ -11,7 +11,8 @@ export enum DisplayState {
     Shop,
     ShopManagement,
     ConfirmPurchase,
-    TeamSummary
+    TeamSummary,
+    TemporaryMessage
 }
 
 export enum CardType {

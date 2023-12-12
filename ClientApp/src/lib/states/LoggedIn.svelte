@@ -28,17 +28,17 @@
     });
 </script>
 
-{#if $team}
+<!-- {#if $team}
     <div class="text-3xl font-semibold">
         {$team.name} (<span class="text-yellow-300"><span class="font-extrabold">{$team.balance}</span> cr</span>)
     </div>
-{/if}
+{/if} -->
 
-<div class="flex gap-4">
+<!-- <div class="flex gap-4">
     {#if $user.name === 'Sam Horn'}
         <button class="btn btn-xl variant-filled-primary" on:click={() => changeState(DisplayState.AdminDashboard)}>Admin Management</button>
     {/if}
     <button class="btn btn-xl variant-filled-tertiary" on:click={() => changeState(DisplayState.Shop)}>The Shop</button>
     <button class="btn btn-xl variant-filled-secondary" on:click={() => signOut()}>Sign Out</button>
-</div>
+</div> -->
 

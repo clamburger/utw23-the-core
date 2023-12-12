@@ -10,9 +10,9 @@
 <div class="flex gap-4">
     <button class="btn variant-filled-primary" on:click={() => changeState(DisplayState.ResettingCards)}>Reset Redeemed Cards</button>
     <button class="btn variant-filled-primary" on:click={() => changeState(DisplayState.RegisteringCards)}>Register New Cards</button>
-<!--    <button class="btn variant-filled-primary" on:click={() => changeState(DisplayState.TeamManagement)}>Team Management</button>-->
+    <button class="btn variant-filled-primary" on:click={() => changeState(DisplayState.TeamManagement)}>Team Management</button>
     <button class="btn variant-filled-primary" on:click={() => changeState(DisplayState.ShopManagement)}>Shop Management</button>
     <button class="btn variant-filled-primary" on:click={() => changeState(DisplayState.TeamSummary)}>Team Summary</button>
-<!--    <button class="btn variant-filled-error" on:click={unregisterAllCards}>Unregister All Cards</button>-->
+    <button class="btn variant-filled-error" on:click={unregisterAllCards}>Unregister All Cards</button>
     <button class="btn variant-filled-error" on:click={() => signOut()}>Sign Out</button>
 </div>
