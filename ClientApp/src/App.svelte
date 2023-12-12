@@ -46,7 +46,6 @@
     <svelte:fragment slot="footer">
         <div class="flex footer">
             <SystemLog />
-            <CardEmulator />
         </div>
     </svelte:fragment>
 </AppShell>

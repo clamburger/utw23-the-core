@@ -12,6 +12,7 @@ export const alert: Writable<Alert> = writable();
 export const user: Writable<User> = writable();
 export const team: Writable<Team> = writable();
 export const shopItem: Writable<ShopItem> = writable();
+export const removeTimeout: Writable<any> = writable();
 
 export interface Alert {
     type: 'success' | 'warning' | 'error' | 'info';

@@ -1,15 +1,27 @@
 ﻿<script lang="ts">
     import {type Card, CardType, DisplayState} from "../../services/game";
     import {
+        cardRemoved,
         changeState,
         clearAlert,
-        connection,
+        connection, removeTimeout,
         showAlert, updateUser
     } from "../../stores";
     import {onMount} from "svelte";
 
     function cardInsertedHandler(_card: Card) {
-        clearAlert();
+        // clearAlert();
+        showAlert('info', 'Enjoyment registered. See you next year!');
+
+        if ($removeTimeout) {
+            clearTimeout($removeTimeout);
+        }
+        
+        $removeTimeout = setTimeout(() => {
+            cardRemoved();
+            clearAlert();
+        }, 3000);
+        return;
         
         if (_card?.id && !_card.enabled) {
             return;

@@ -23,9 +23,9 @@
             First Time Setup
         </span>
     {:else if $state === DisplayState.Ready}
-        <span class='header from-lime-300 to-emerald-500'>
-            Ready To Scan
-        </span>
+        <div class='header from-lime-300 to-emerald-500 text-center' style="line-height: 1.3" >
+            Please scan to register your enjoyment of camp.
+        </div>
     {:else if $state === DisplayState.LoggedIn}
         <span class='header from-blue-300 to-green-500'>
             Welcome, {$user.name}.

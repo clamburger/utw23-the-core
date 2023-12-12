@@ -63,9 +63,9 @@
     });
 
     $connection.on('CardRemoved', () => {
-        cardRemoved();
+        // cardRemoved();
         // addLog('Card removed');
-        clearAlert();
+        // clearAlert();
     });
     
     $connection.on('TeamUpdate', (_team: Team) => {

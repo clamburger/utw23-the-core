@@ -1,6 +1,6 @@
 <script lang="ts">
-    import {alert, card, state} from '../stores'
-    import {DisplayState, label, redeemable} from "../services/game";
+    import {alert, card, cardRemoved, clearAlert, removeTimeout, showAlert, state, updateCard} from '../stores'
+    import {CardType, DisplayState, label, redeemable, type RegisteredCard} from "../services/game";
 
     $: registered = $card && $card.id;
     $: unregistered = $card && !$card.id;
@@ -58,6 +58,34 @@
         }
 
         return elements.join('<span class="dash">-</span>');
+    }
+    
+    function clicked()
+    {
+        const card: RegisteredCard = {
+            id: 10000,
+            uid: '00-00-00-00-00-00-00',
+            redeemed: false,
+            enabled: true,
+            type: CardType.Person,
+            user: {
+                id: 10000,
+                name: 'Übertweak Attendee',
+                leader: false,
+            }
+        };
+        
+        updateCard(card);
+        showAlert('info', 'Enjoyment registered. See you next year!');
+
+        if ($removeTimeout) {
+            clearTimeout($removeTimeout);
+        }
+
+        $removeTimeout = setTimeout(() => {
+            cardRemoved();
+            clearAlert();
+        }, 3000);
     }
 </script>
 
@@ -125,6 +153,7 @@
 <div class="w-[300px] mx-auto">
     <div class='nfc-card card mx-auto font-mono transition flex flex-col items-center text-center relative {className} pb-2'
          class:error={$alert?.type === 'error'}
+         on:click={clicked}
     >
         <div class="flex flex-col flex-grow justify-center items-center">
             {#if !$card}
