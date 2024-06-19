@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Spectre.Console;
+using UbertweakNfcReaderWeb.Messages;
 using UbertweakNfcReaderWeb.Models;
 using UbertweakNfcReaderWeb.Services;
 
@@ -19,14 +20,17 @@ namespace UbertweakNfcReaderWeb.Hubs
         Task TeamUpdate(Team team);
         Task CardUpdate(Card card);
         Task PurchaseSuccessful(ShopItem item);
+        Task ScannerUpdate();
     }
 
     public class MessageHub : Hub<IMessageClient>
     {
         private readonly PlexusService _plexus;
+        private readonly ScannerService _connectionManager;
 
-        public MessageHub(PlexusService plexus) {
+        public MessageHub(PlexusService plexus, ScannerService connectionManager) {
             _plexus = plexus;
+            _connectionManager = connectionManager;
         }
 
         public async Task RegisterPrimary()
@@ -633,6 +637,29 @@ namespace UbertweakNfcReaderWeb.Hubs
 
             db.Scans.Add(scan);
             await db.SaveChangesAsync();
+        }
+
+        public async Task UpdateScannerState(ScannerState state)
+        {
+            var message = new SetState
+            {
+                State = state
+            };
+            
+            await _connectionManager.SendToAll(message);
+        }
+
+        public async void DisconnectScanners(List<string> connectionIds)
+        {
+            foreach (var connectionId in connectionIds)
+            {
+                _connectionManager.DisconnectScanner(connectionId);
+            }
+
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).ScannerUpdate();
+            }
         }
     }
 }

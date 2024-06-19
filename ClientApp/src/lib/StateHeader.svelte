@@ -46,6 +46,10 @@
         <span class='header from-blue-500 to-blue-300'>
             Admin Dashboard
         </span>
+    {:else if $state === DisplayState.ScannerInfo}
+        <span class='header from-purple-600 to-purple-300'>
+            Scanner Info
+        </span>
     {:else if $state === DisplayState.TeamManagement}
         <span class='header from-blue-100 to-blue-500'>
             Team Management
@@ -61,6 +65,10 @@
     {:else if $state === DisplayState.TeamSummary}
         <span class="header from-blue-50 to-blue-400">
             Team Summary
+        </span>
+    {:else if $state === DisplayState.VoteResults}
+        <span class="header from-rose-100 to-violet-600">
+            Vote Results
         </span>
     {:else}
         <span class='header from-stone-500 to-slate-300'>

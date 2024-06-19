@@ -11,7 +11,9 @@ export enum DisplayState {
     Shop,
     ShopManagement,
     ConfirmPurchase,
-    TeamSummary
+    TeamSummary,
+    ScannerInfo,
+    VoteResults
 }
 
 export enum CardType {
@@ -52,6 +54,22 @@ export interface Team {
     pin?: string;
     balance: number;
     shopItems: (ShopItem|null)[];
+}
+
+export enum ScannerState {
+    Disabled = 1,
+    Ready,
+    InvalidCard,
+    ReadyToSelect,
+    OptionSelected,
+}
+
+export interface Scanner {
+    cardUid: string|null;
+    connectionId: string;
+    ipAddress: string;
+    state: ScannerState|null;
+    stationId: number|null;
 }
 
 export function redeemable(type: CardType): boolean {

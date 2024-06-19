@@ -13,6 +13,8 @@ export var DisplayState;
     DisplayState[DisplayState["ShopManagement"] = 10] = "ShopManagement";
     DisplayState[DisplayState["ConfirmPurchase"] = 11] = "ConfirmPurchase";
     DisplayState[DisplayState["TeamSummary"] = 12] = "TeamSummary";
+    DisplayState[DisplayState["ScannerInfo"] = 13] = "ScannerInfo";
+    DisplayState[DisplayState["VoteResults"] = 14] = "VoteResults";
 })(DisplayState || (DisplayState = {}));
 export var CardType;
 (function (CardType) {
@@ -23,6 +25,14 @@ export var CardType;
     CardType[CardType["SpecialReward"] = 4] = "SpecialReward";
     CardType[CardType["ProofOfTask"] = 5] = "ProofOfTask";
 })(CardType || (CardType = {}));
+export var ScannerState;
+(function (ScannerState) {
+    ScannerState[ScannerState["Disabled"] = 1] = "Disabled";
+    ScannerState[ScannerState["Ready"] = 2] = "Ready";
+    ScannerState[ScannerState["InvalidCard"] = 3] = "InvalidCard";
+    ScannerState[ScannerState["ReadyToSelect"] = 4] = "ReadyToSelect";
+    ScannerState[ScannerState["OptionSelected"] = 5] = "OptionSelected";
+})(ScannerState || (ScannerState = {}));
 export function redeemable(type) {
     return [
         CardType.Credits,

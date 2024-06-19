@@ -26,6 +26,8 @@
     import Shop from "./states/Shop.svelte";
     import ConfirmPurchase from "./states/ConfirmPurchase.svelte";
     import TeamSummary from "./states/TeamSummary.svelte";
+    import ScannerInfo from "./states/ScannerInfo.svelte";
+    import VoteResults from "./states/VoteResults.svelte";
 
     $connection = setupSignalRConnection('/api/hub', {});
 
@@ -36,7 +38,7 @@
             changeState(DisplayState.RegisteringCards);
             addLog("No admin cards registered - entering first time setup");
         } else {
-            changeState(DisplayState.Ready);
+            changeState(DisplayState.AdminDashboard);
         }
     });
 
@@ -108,5 +110,9 @@
         <ConfirmPurchase />
     {:else if $state === DisplayState.TeamSummary}
         <TeamSummary />
+    {:else if $state === DisplayState.ScannerInfo}
+        <ScannerInfo />
+    {:else if $state === DisplayState.VoteResults}
+        <VoteResults />
     {/if}
 </div>

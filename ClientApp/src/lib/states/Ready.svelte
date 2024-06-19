@@ -4,7 +4,7 @@
         changeState,
         clearAlert,
         connection,
-        showAlert, updateUser
+        showAlert, signOut, updateUser
     } from "../../stores";
     import {onMount} from "svelte";
 

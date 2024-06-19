@@ -34,7 +34,7 @@
     </div>
     
     <div class="p-4">
-        {#if $state !== DisplayState.Shop}
+        {#if $state === DisplayState.RegisteringCards}
             <CardReader />
         {/if}
     </div>

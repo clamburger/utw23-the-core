@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UbertweakNfcReaderWeb.Models;
+using UbertweakNfcReaderWeb.Services;
 
 namespace UbertweakNfcReaderWeb.Controllers;
 
@@ -11,6 +12,13 @@ namespace UbertweakNfcReaderWeb.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly DatabaseContext _db = new();
+    
+    private readonly ScannerService _connectionManager;
+
+    public AdminController(ScannerService connectionManager)
+    {
+        _connectionManager = connectionManager;
+    }
 
     [HttpGet("users")]
     public ActionResult<List<UserDto>> Users()
@@ -60,5 +68,36 @@ public class AdminController : ControllerBase
             .ToList();
 
         return teams;
+    }
+    
+    [HttpGet("scanners")]
+    public ActionResult<List<Scanner>> Scanners()
+    {
+        return _connectionManager.GetScanners();
+    }
+
+    public class VoteResultsDto
+    {
+        public List<VoteOption> Options { get; set; }
+        public List<UserVote> Votes { get; set; }
+    }
+    
+    [HttpGet("vote-results")]
+    public ActionResult<VoteResultsDto> VoteResults()
+    {
+        var options = _db.VoteOptions
+            .OrderBy(o => o.Number)
+            .ToList();
+        
+        var votes = _db.UserVotes
+            .Include(v => v.User)
+            .Include(v => v.Option)
+            .ToList();
+
+        return new VoteResultsDto
+        {
+            Options = options,
+            Votes = votes
+        };
     }
 }

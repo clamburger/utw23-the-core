@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
 using MediatR;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Hosting;
 using Spectre.Console;
 using UbertweakNfcReaderWeb.Hubs;
+using UbertweakNfcReaderWeb.Messages;
 using UbertweakNfcReaderWeb.Messaging;
 using UbertweakNfcReaderWeb.Services;
 
@@ -23,10 +25,20 @@ namespace UbertweakNfcReaderWeb
             builder.Services.AddHostedService<Worker>();
             builder.Services.AddSingleton<NfcService>();
             builder.Services.AddSingleton<PlexusService>();
+            builder.Services.AddSingleton<ScannerService>();
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Program>());
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+            options.ListenAnyIP(5206);
+                 
+            options.ListenAnyIP(4242, listenOptions =>
+            {
+            listenOptions.UseConnectionHandler<TcpConnectionHandler>();
+            });
             });
 
             var app = builder.Build();
@@ -51,11 +63,11 @@ namespace UbertweakNfcReaderWeb
         private static void ShowWelcomeMessage()
         {
             Panel panel = new(
-                Align.Center(new Markup("[yellow1]Welcome to the �bertweak Central Plexus\n\nCore systems initialised.[/]"))
+                Align.Center(new Markup("[yellow1]Welcome to the Übertweak Central Plexus\nCore systems initialised.[/]"))
             )
             {
                 Border = BoxBorder.Double,
-                Padding = new Padding(1),
+                Padding = new Padding(0),
                 Expand = true
             };
             panel.BorderColor(Color.Green1);
