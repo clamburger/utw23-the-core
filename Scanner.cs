@@ -46,7 +46,7 @@ public class Scanner
                 }
                 break;
             case CardRead cardRead:
-                CardUid = cardRead.Uid.Replace(" ", "-");
+                CardUid = cardRead.Uid.Trim().Replace(" ", "-");
                 SelectedOption = null;
                 break;
             case OptionSelected optionSelected:
@@ -83,6 +83,6 @@ public class Scanner
         var buffer = Encoding.UTF8.GetBytes(messageJson + "\n");
         await _connection.Transport.Output.WriteAsync(buffer);
         
-        Thread.Sleep(500);
+        Thread.Sleep(1000);
     }
 }

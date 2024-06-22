@@ -81,17 +81,17 @@ public class TcpConnectionHandler : ConnectionHandler
                 
                 stringBuffer = "";
 
-                if (assembledMessage.Contains("uid"))
-                {
-                    // Fix uid field not having quotes around it
-                    assembledMessage =
-                        Regex.Replace(assembledMessage, "\"uid\": (([0-9A-F]{2} ?)+)", "\"uid\": \"$1\"");
-                }
+                // if (assembledMessage.Contains("uid"))
+                // {
+                //     // Fix uid field not having quotes around it
+                //     assembledMessage =
+                //         Regex.Replace(assembledMessage, "\"uid\": (([0-9A-F]{2} ?)+)", "\"uid\": \"$1\"");
+                // }
 
-                if (assembledMessage.Contains("option"))
-                {
-                    assembledMessage = assembledMessage.Replace("\"type\": 2", "\"type\": 3");
-                }
+                // if (assembledMessage.Contains("option"))
+                // {
+                //     assembledMessage = assembledMessage.Replace("\"type\": 2", "\"type\": 3");
+                // }
                 
                 AnsiConsole.MarkupInterpolated($"[blue]{connection.ConnectionId}[/] [aqua]-> {assembledMessage}[/]");
                 
@@ -133,7 +133,7 @@ public class TcpConnectionHandler : ConnectionHandler
                     using (var db = new DatabaseContext())
                     {
                         var card = db.Cards.Include(card => card.User)
-                            .SingleOrDefault(c => c.Uid == cardRead.Uid.Replace(" ", "-"));
+                            .SingleOrDefault(c => c.Uid == cardRead.Uid.Trim().Replace(" ", "-"));
                         
                         if (card?.User == null)
                         {
@@ -162,7 +162,7 @@ public class TcpConnectionHandler : ConnectionHandler
                     using (var db = new DatabaseContext())
                     {
                         var card = db.Cards.Include(card => card.User)
-                            .SingleOrDefault(c => c.Uid == optionSelected.Uid.Replace(" ", "-"));
+                            .SingleOrDefault(c => c.Uid == optionSelected.Uid.Trim().Replace(" ", "-"));
                         
                         var option = db.VoteOptions.FirstOrDefault(option => option.Number == optionSelected.OptionNumber);
 
