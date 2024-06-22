@@ -12,6 +12,7 @@ export const alert: Writable<Alert> = writable();
 export const user: Writable<User> = writable();
 export const team: Writable<Team> = writable();
 export const shopItem: Writable<ShopItem> = writable();
+export const showVoters: Writable<boolean> = writable(false);
 
 export interface Alert {
     type: 'success' | 'warning' | 'error' | 'info';
@@ -62,6 +63,10 @@ export function updateUser(_user: User): void {
 
 export function updateShopItem(_item: ShopItem): void {
     shopItem.set(_item);
+}
+
+export function setShowVoters(value: boolean): void {
+    showVoters.set(value);
 }
 
 export function signOut(): void {

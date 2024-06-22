@@ -21,6 +21,8 @@ namespace UbertweakNfcReaderWeb.Hubs
         Task CardUpdate(Card card);
         Task PurchaseSuccessful(ShopItem item);
         Task ScannerUpdate();
+        Task OptionUpdated(VoteOption option);
+        Task OptionAdded(VoteOption option);
     }
 
     public class MessageHub : Hub<IMessageClient>
@@ -311,6 +313,18 @@ namespace UbertweakNfcReaderWeb.Hubs
         public async Task RemoveAllUsers()
         {
             await using var db = new DatabaseContext();
+
+            foreach (var card in db.Cards.Where(c => c.User != null))
+            {
+                db.Cards.Remove(card);
+            }
+            
+            foreach (var vote in db.UserVotes)
+            {
+                db.UserVotes.Remove(vote);
+            }
+            
+            await db.SaveChangesAsync();
             
             foreach (var user in db.Users)
             {
@@ -348,13 +362,15 @@ namespace UbertweakNfcReaderWeb.Hubs
             // Recreate the teams
             var teams = new[]
             {
-                new Team { Name = "Makers", Colour = "#002966" },
-                new Team { Name = "Fixers", Colour = "#B8AC00" },
-                new Team { Name = "Chargers", Colour = "#0B3B0B" },
-                new Team { Name = "Helpers", Colour = "#E1E1E1" },
-                new Team { Name = "Finders", Colour = "#6A2F96" },
-                new Team { Name = "Transporters", Colour = "#940300" },
-                new Team { Name = "Bulders", Colour = "#141414" }
+                new Team { Name = "Cotton", Colour = "#FF00FF" },
+                new Team { Name = "Bolger", Colour = "#0000FF" },
+                new Team { Name = "Proudfoot", Colour = "#00FF00" },
+                new Team { Name = "Underhill", Colour = "#274E13" },
+                new Team { Name = "Boffin", Colour = "#FF0000" },
+                new Team { Name = "Hornblower", Colour = "#434343" },
+                new Team { Name = "Gamgee", Colour = "#FFFF00" },
+                new Team { Name = "Whitfoot", Colour = "#FFFFFF" },
+                new Team { Name = "Took", Colour = "#9900FF" }
             };
 
             foreach (var team in teams)
@@ -381,7 +397,8 @@ namespace UbertweakNfcReaderWeb.Hubs
 
             var leaderRoles = new[] {
                 "Volunteer",
-                "Cook/Helper"
+                "Cook/Helper",
+                "Team Member"
             };
 
             var users = lines.ToList();
@@ -660,6 +677,191 @@ namespace UbertweakNfcReaderWeb.Hubs
             {
                 await Clients.Client(_plexus.PrimaryConnection).ScannerUpdate();
             }
+        }
+
+        public async void UpdateOptionLabel(int id, string label)
+        {
+            await using var db = new DatabaseContext();
+            
+            var option = await db.VoteOptions.FindAsync(id);
+            if (option == null)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Invalid option.");
+                }
+                return;
+            }
+
+            option.Name = label;
+            
+            await db.SaveChangesAsync();
+            
+            await _connectionManager.SendToAll(new SetOptionTitle
+            {
+                Text = option.Name,
+                OptionNumber = option.Number
+            });
+
+            if (!option.Enabled)
+            {
+                await _connectionManager.SendToAll(new SetOptionEnabled
+                {
+                    Enabled = option.Enabled ? 1 : 0,
+                    OptionNumber = option.Number
+                });
+            }
+        }
+
+        public async Task UpdateOptionEnabled(int id, bool enabled)
+        {
+            await using var db = new DatabaseContext();
+            
+            var option = await db.VoteOptions.FindAsync(id);
+            if (option == null)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Invalid option.");
+                }
+                return;
+            }
+
+            option.Enabled = enabled;
+            
+            await db.SaveChangesAsync();
+            
+            await _connectionManager.SendToAll(new SetOptionEnabled
+            {
+                Enabled = option.Enabled ? 1 : 0,
+                OptionNumber = option.Number
+            });
+        }
+        
+        public async Task UpdateOptionLimit(int id, int? limit)
+        {
+            await using var db = new DatabaseContext();
+            
+            var option = await db.VoteOptions.FindAsync(id);
+            if (option == null)
+            {
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).SystemError("Invalid option.");
+                }
+                return;
+            }
+            
+            option.Limit = limit;
+            
+            await db.SaveChangesAsync();
+
+            var voteCount = db.UserVotes
+                .Count(v => v.Option.Id == option.Id);
+
+            if (voteCount >= option.Limit)
+            {
+                option.Enabled = false;
+            
+                await db.SaveChangesAsync();
+            
+                await _connectionManager.SendToAll(new SetOptionEnabled
+                {
+                    Enabled = option.Enabled ? 1 : 0,
+                    OptionNumber = option.Number
+                });
+                
+                if (_plexus.PrimaryConnection != null)
+                {
+                    await Clients.Client(_plexus.PrimaryConnection).OptionUpdated(option);
+                }
+            }
+        }
+
+        public async Task DeleteOption(int id)
+        {
+            await using var db = new DatabaseContext();
+
+            var votes = db.UserVotes.Where(v => v.Option.Id == id);
+            foreach (var vote in votes)
+            {
+                db.UserVotes.Remove(vote);
+            }
+
+            await db.SaveChangesAsync();
+
+            var deletingOption = await db.VoteOptions.FindAsync(id);
+            if (deletingOption == null)
+            {
+                return;
+            }
+
+            var options = db.VoteOptions
+                .Where(o => o.Number >= deletingOption.Number)
+                .OrderBy(o => o.Number).ToList();
+            
+            var newNumber = 0;
+            foreach (var option in options)
+            {
+                if (option.Id == id)
+                {
+                    db.VoteOptions.Remove(option);
+                    continue;
+                }
+
+                newNumber += 1;
+                option.Number = newNumber;
+            }
+
+            await db.SaveChangesAsync();
+
+            await _connectionManager.UpdateAllSettings();
+        }
+
+        public async Task AddOption()
+        {
+            await using var db = new DatabaseContext();
+
+            var number = db.VoteOptions.Count() + 1;
+
+            var option = new VoteOption
+            {
+                Enabled = true,
+                Name = "Option " + number,
+                Number = number,
+                Limit = null
+            };
+
+            await db.VoteOptions.AddAsync(option);
+            await db.SaveChangesAsync();
+            
+            if (_plexus.PrimaryConnection != null)
+            {
+                await Clients.Client(_plexus.PrimaryConnection).OptionAdded(option);
+            }
+            
+            await _connectionManager.SendToAll(new SetNumberOfOptions
+            {
+                OptionCount = option.Number
+            });
+            
+            await _connectionManager.SendToAll(new SetOptionTitle
+            {
+                OptionNumber = option.Number,
+                Text = option.Name
+            });
+        }
+
+        public async Task ClearVotes()
+        {
+            await using var db = new DatabaseContext();
+
+            foreach (var vote in db.UserVotes)
+            {
+                db.Remove(vote);
+            }
+
+            await db.SaveChangesAsync();
         }
     }
 }

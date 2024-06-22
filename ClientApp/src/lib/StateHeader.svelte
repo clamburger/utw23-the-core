@@ -68,7 +68,11 @@
         </span>
     {:else if $state === DisplayState.VoteResults}
         <span class="header from-rose-100 to-violet-600">
-            Vote Results
+            Results
+        </span>
+    {:else if $state === DisplayState.PollOptions}
+        <span class="header from-violet-400 to-rose-200">
+            Poll Options
         </span>
     {:else}
         <span class='header from-stone-500 to-slate-300'>

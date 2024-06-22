@@ -13,7 +13,8 @@ export enum DisplayState {
     ConfirmPurchase,
     TeamSummary,
     ScannerInfo,
-    VoteResults
+    VoteResults,
+    PollOptions
 }
 
 export enum CardType {

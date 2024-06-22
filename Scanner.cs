@@ -61,7 +61,7 @@ public class Scanner
         return _connection;
     }
 
-    public async Task SendMessage(ServerMessage message)
+    public async Task SendMessage(ServerMessage message, bool wait = true)
     {
         var jsonOptions = new JsonSerializerOptions
         {
@@ -82,7 +82,10 @@ public class Scanner
             
         var buffer = Encoding.UTF8.GetBytes(messageJson + "\n");
         await _connection.Transport.Output.WriteAsync(buffer);
-        
-        Thread.Sleep(1000);
+
+        if (wait)
+        {
+            Thread.Sleep(1000);            
+        }
     }
 }

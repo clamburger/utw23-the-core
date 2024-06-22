@@ -44,7 +44,7 @@ public class TcpConnectionHandler : ConnectionHandler
         {
             await StartMonitor(connection);
         }
-        catch (ConnectionAbortedException e)
+        catch (ConnectionAbortedException)
         {
             _connectionManager.RemoveScanner(connection);
         }
@@ -159,12 +159,15 @@ public class TcpConnectionHandler : ConnectionHandler
 
                 if (clientMessage is OptionSelected optionSelected)
                 {
+                    var disableOption = false;
+                    VoteOption? option;
+                    
                     using (var db = new DatabaseContext())
                     {
                         var card = db.Cards.Include(card => card.User)
                             .SingleOrDefault(c => c.Uid == optionSelected.Uid.Trim().Replace(" ", "-"));
                         
-                        var option = db.VoteOptions.FirstOrDefault(option => option.Number == optionSelected.OptionNumber);
+                        option = db.VoteOptions.FirstOrDefault(o => o.Number == optionSelected.OptionNumber);
 
                         if (card?.User == null)
                         {
@@ -198,12 +201,30 @@ public class TcpConnectionHandler : ConnectionHandler
                         }
                         
                         await db.SaveChangesAsync();
+
+                        var count = db.UserVotes.Count(vote => vote.Option.Id == option.Id);
+                        if (option.Limit != null && count >= option.Limit)
+                        {
+                            option.Enabled = false;
+                            await db.SaveChangesAsync();
+
+                            disableOption = true;
+                        }
                     }
                     
                     await scanner.SendMessage(new SetState
                     {
                         State = ScannerState.OptionSelected
                     });
+
+                    if (disableOption)
+                    {
+                        await _connectionManager.SendToAll(new SetOptionEnabled
+                        {
+                            OptionNumber = option.Number,
+                            Enabled = option.Enabled ? 1 : 0
+                        });
+                    }
                 }
                 
                 if (_plexus.PrimaryConnection != null)

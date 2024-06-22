@@ -28,18 +28,19 @@
     import TeamSummary from "./states/TeamSummary.svelte";
     import ScannerInfo from "./states/ScannerInfo.svelte";
     import VoteResults from "./states/VoteResults.svelte";
+    import PollOptions from "./states/PollOptions.svelte";
 
     $connection = setupSignalRConnection('/api/hub', {});
 
     $connection.on('ScreenRegistered', (firstTimeSetup: boolean) => {
         addLog("Registered as the primary screen");
 
-        if (firstTimeSetup) {
-            changeState(DisplayState.RegisteringCards);
-            addLog("No admin cards registered - entering first time setup");
-        } else {
+        // if (firstTimeSetup) {
+        //     changeState(DisplayState.RegisteringCards);
+        //     addLog("No admin cards registered - entering first time setup");
+        // } else {
             changeState(DisplayState.AdminDashboard);
-        }
+        // }
     });
 
     $connection.on('ScreenDeregistered', () => {
@@ -81,6 +82,8 @@
             updateCard(_card);
         }
     })
+    
+    $connection.on('ScannerUpdate', () => {});
 </script>
 
 <div class="flex flex-col flex-grow space-y-6 items-center">
@@ -114,5 +117,7 @@
         <ScannerInfo />
     {:else if $state === DisplayState.VoteResults}
         <VoteResults />
+    {:else if $state === DisplayState.PollOptions}
+        <PollOptions />
     {/if}
 </div>

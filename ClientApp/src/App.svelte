@@ -25,16 +25,16 @@
 </style>
 
 <AppShell>
-    <div class="logo mx-auto my-4">
-        {#if inShop($state)}
-            <LogoShop />
-        {:else}
-            <Logo />
-        {/if}
-    </div>
+<!--    <div class="logo mx-auto my-4">-->
+<!--        {#if inShop($state)}-->
+<!--            <LogoShop />-->
+<!--        {:else}-->
+<!--            <Logo />-->
+<!--        {/if}-->
+<!--    </div>-->
     
     <div class="p-4">
-        {#if $state === DisplayState.RegisteringCards}
+        {#if $state === DisplayState.RegisteringCards || $state === DisplayState.AdminDashboard}
             <CardReader />
         {/if}
     </div>
@@ -43,10 +43,10 @@
         <MainDisplay />
     </div>
 
-    <svelte:fragment slot="footer">
-        <div class="flex footer">
-            <SystemLog />
-            <CardEmulator />
-        </div>
-    </svelte:fragment>
+<!--    <svelte:fragment slot="footer">-->
+<!--        <div class="flex footer">-->
+<!--            <SystemLog />-->
+<!--            <CardEmulator />-->
+<!--        </div>-->
+<!--    </svelte:fragment>-->
 </AppShell>

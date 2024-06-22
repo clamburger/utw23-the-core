@@ -15,6 +15,7 @@ export var DisplayState;
     DisplayState[DisplayState["TeamSummary"] = 12] = "TeamSummary";
     DisplayState[DisplayState["ScannerInfo"] = 13] = "ScannerInfo";
     DisplayState[DisplayState["VoteResults"] = 14] = "VoteResults";
+    DisplayState[DisplayState["PollOptions"] = 15] = "PollOptions";
 })(DisplayState || (DisplayState = {}));
 export var CardType;
 (function (CardType) {

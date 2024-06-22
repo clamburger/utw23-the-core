@@ -47,6 +47,14 @@ public class ScannerService
         return _scanners;
     }
 
+    public async Task UpdateAllSettings()
+    {
+        foreach (var scanner in _scanners)
+        {
+            await UpdateSettings(scanner);
+        }
+    }
+
     public async Task UpdateSettings(Scanner scanner)
     {
         using var db = new DatabaseContext();
@@ -81,8 +89,10 @@ public class ScannerService
     {
         foreach (var scanner in _scanners)
         {
-            await Task.Run(() => scanner.SendMessage(message));
+            await Task.Run(() => scanner.SendMessage(message, false));
         }
+        
+        Thread.Sleep(1000);
     }
 
     public void DisconnectScanner(string connectionId)

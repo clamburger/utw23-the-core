@@ -100,4 +100,14 @@ public class AdminController : ControllerBase
             Votes = votes
         };
     }
+    
+    [HttpGet("poll-options")]
+    public ActionResult<List<VoteOption>> PollOptions()
+    {
+        var options = _db.VoteOptions
+            .OrderBy(o => o.Number)
+            .ToList();
+
+        return options;
+    }
 }
